@@ -758,7 +758,7 @@ void estimate_polya_for_single_read(const ReadDB& read_db,
     uint32_t suffix_clip = bam_cigar_oplen(suffix_cigar);
 
     //----- construct SquiggleRead; if there are load issues, print -1's and skip compute:
-    SquiggleRead sr(read_name, read_db, SRF_LOAD_RAW_SAMPLES);
+    SquiggleRead sr(read_name, read_db, false, SRF_LOAD_RAW_SAMPLES);
     if (sr.fast5_path == "" || sr.events[0].empty()) {
         #pragma omp critical
 	{

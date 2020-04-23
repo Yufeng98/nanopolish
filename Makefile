@@ -8,8 +8,8 @@ SUBDIRS := src src/hmm src/thirdparty src/thirdparty/scrappie src/common src/ali
 #
 
 #Basic flags every build needs
-LIBS = -lz
-CXXFLAGS ?= -g -O3
+LIBS = -lz  # libz is Zlib, a compression library which can do gzip, deflate, and a few other formats
+CXXFLAGS ?= -g -O3  # ?= means only if it's not set/doesn't have a value
 CXXFLAGS += -std=c++11 -fopenmp -fsigned-char -D_FILE_OFFSET_BITS=64 #D_FILE_OFFSET_BITS=64 makes nanopolish work in 32 bit systems
 CFLAGS ?= -O3 -std=c99 -fsigned-char -D_FILE_OFFSET_BITS=64
 LDFLAGS ?=
@@ -28,13 +28,13 @@ EIGEN_VERSION ?= 3.3.7
 # Check operating system, OSX doesn't have -lrt
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-    LIBS += -lrt
+    LIBS += -lrt    # provides POSIX realtime extensions
 endif
 
 # Default to automatically installing hdf5
 ifeq ($(HDF5), install)
     H5_LIB = ./lib/libhdf5.a
-    H5_INCLUDE = -I./include
+    H5_INCLUDE = -I./include    # adds a directory to the list of places searched by the compiler for a file named on a #include line=
     LIBS += -ldl
 else
     # Use system-wide hdf5
@@ -124,10 +124,10 @@ lib/libhdf5.a:
 # Download and install eigen if not already downloaded
 eigen/INSTALL:
 	if [ ! -e $(EIGEN_VERSION).tar.bz2 ]; then \
-		wget http://bitbucket.org/eigen/eigen/get/$(EIGEN_VERSION).tar.bz2; \
+		wget https://gitlab.com/libeigen/eigen/-/archive/$(EIGEN_VERSION)/eigen-$(EIGEN_VERSION).tar.bz2; \
 	fi
-	tar -xjf $(EIGEN_VERSION).tar.bz2 || exit 255
-	mv eigen-eigen-* eigen || exit 255
+	tar -xjf eigen-$(EIGEN_VERSION).tar.bz2 || exit 255
+	mv eigen-$(EIGEN_VERSION) eigen || exit 255
 
 #
 # Source files
@@ -153,6 +153,7 @@ depend: .depend
 # Compile objects
 .cpp.o:
 	$(CXX) -o $@ -c $(CXXFLAGS) $(CPPFLAGS) -fPIC $<
+# $@: the first object file, $<: the first dependent file
 
 .c.o:
 	$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $(H5_INCLUDE) -fPIC $<

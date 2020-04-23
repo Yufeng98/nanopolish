@@ -64,7 +64,7 @@ int print_version(int, char **)
     return 0;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char** argv)     // argc is the number of parameters, argv are parameters
 {
     // Turn off HDF's exception printing, which is generally unhelpful for users
     H5Eset_auto(0, NULL, NULL);

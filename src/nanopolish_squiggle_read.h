@@ -112,15 +112,15 @@ class SquiggleRead
     public:
 
         SquiggleRead() {} // legacy TODO remove
-        SquiggleRead(const std::string& name, const ReadDB& read_db, const uint32_t flags = 0);
-        SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const uint32_t flags = 0);
-        SquiggleRead(const std::string& sequence, const Fast5Data& data, const uint32_t flags = 0);
+        SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_calss = false, const uint32_t flags = 0);
+        SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_calss = false, const uint32_t flags = 0);
+        SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_calss = false, const uint32_t flags = 0);
         ~SquiggleRead();
 
         //
         // I/O
         //
-        void init(const std::string& read_sequence, const Fast5Data& data, const uint32_t flags);
+        void init(const std::string& read_sequence, const Fast5Data& data, const bool save_calss, const uint32_t flags);
 
         //
         // Access to data
@@ -309,7 +309,7 @@ class SquiggleRead
         void load_from_events(const uint32_t flags);
 
         // Load all read data from raw samples
-        void load_from_raw(const Fast5Data& fast5_data, const uint32_t flags);
+        void load_from_raw(const bool save_class, const Fast5Data& fast5_data, const uint32_t flags);
 
         // Version-specific intialization functions
         void _load_R7(uint32_t si);
