@@ -393,7 +393,7 @@ int scorereads_main(int argc, char** argv)
 
                     //load read
                     std::string read_name = bam_get_qname(record);
-                    SquiggleRead sr(read_name, read_db, false);
+                    SquiggleRead sr(read_name, read_db, false, false);
                     
                     // TODO: early exit when have processed all of the reads in readnames
                     if (!opt::readnames.empty() &&

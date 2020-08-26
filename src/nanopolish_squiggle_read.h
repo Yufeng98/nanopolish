@@ -112,15 +112,15 @@ class SquiggleRead
     public:
 
         SquiggleRead() {} // legacy TODO remove
-        SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_calss = false, const uint32_t flags = 0);
-        SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_calss = false, const uint32_t flags = 0);
-        SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_calss = false, const uint32_t flags = 0);
+        SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_class = false, const bool load_class = false, const uint32_t flags = 0);
+        SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_class = false, const bool load_class = false, const uint32_t flags = 0);
+        SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_class = false, const bool load_class = false, const uint32_t flags = 0);
         ~SquiggleRead();
 
         //
         // I/O
         //
-        void init(const std::string& read_sequence, const Fast5Data& data, const bool save_calss, const uint32_t flags);
+        void init(const std::string& read_sequence, const Fast5Data& data, const bool save_class, const bool load_class, const uint32_t flags);
 
         //
         // Access to data

@@ -344,7 +344,7 @@ void add_aligned_events(const ReadDB& read_db,
     std::string read_name = bam_get_qname(record);
 
     // load read
-    SquiggleRead sr(read_name, read_db, false);
+    SquiggleRead sr(read_name, read_db, false, false);
 
     for(size_t strand_idx = 0; strand_idx < NUM_STRANDS; ++strand_idx) {
         // skip if 1D reads and this is the wrong strand

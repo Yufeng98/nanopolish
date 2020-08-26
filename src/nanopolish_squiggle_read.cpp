@@ -6,6 +6,9 @@
 // nanopolish_squiggle_read -- Class holding a squiggle (event)
 // space nanopore read
 //
+#include <iostream>
+#include <fstream>
+#include <string>
 #include <algorithm>
 #include "nanopolish_common.h"
 #include "nanopolish_squiggle_read.h"
@@ -67,7 +70,7 @@ void SquiggleScalings::set6(double _shift,
 }
 
 //
-SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_class, const uint32_t flags)
+SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_class, const bool load_class, const uint32_t flags)
 {
     this->fast5_path = read_db.get_signal_path(name);
     g_total_reads += 1;
@@ -79,7 +82,7 @@ SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const
     std::string sequence = read_db.get_read_sequence(name);
     Fast5Data data = Fast5Loader::load_read(fast5_path, name);
     if(data.is_valid && !sequence.empty()) {
-        init(sequence, data, save_class, flags);
+        init(sequence, data, save_class, load_class, flags);
     } else {
         fprintf(stderr, "[warning] fast5 file is unreadable and will be skipped: %s\n", fast5_path.c_str());
         g_bad_fast5_file += 1;
@@ -92,18 +95,18 @@ SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const
     data.rt.raw = NULL;
 }
 
-SquiggleRead::SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_class, const uint32_t flags)
+SquiggleRead::SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_class, const bool load_class, const uint32_t flags)
 {
-    init(read_db.get_read_sequence(data.read_name), data, save_class, flags);
+    init(read_db.get_read_sequence(data.read_name), data, save_class, load_class, flags);
 }
 
-SquiggleRead::SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_class, const uint32_t flags)
+SquiggleRead::SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_class, const bool load_class, const uint32_t flags)
 {
-    init(sequence, data, save_class, flags);
+    init(sequence, data, save_class, load_class, flags);
 }
 
 //
-void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data, const bool save_class, const uint32_t flags)
+void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data, const bool save_class, const bool load_class, const uint32_t flags)
 {
     this->nucleotide_type = SRNT_DNA;
     this->pore_type = PT_UNKNOWN;
@@ -350,6 +353,17 @@ void SquiggleRead::load_from_raw(const bool save_class, const Fast5Data& fast5_d
     // clean up event tables
     assert(et.event != NULL);
     free(et.event);
+
+    // save input of the most time consuming function: adaptive_banded_simple_event_align
+    std::ofstream file_obj;
+    file_obj.open("ssquiggleRead.class");
+    file_obj.write((char*)&(*this), sizeof(*this));
+    std::cout << "Save class SquiggleRead into squiggle.class file." << std::endl;
+
+    // save read_sequence
+    std::ofstream file_str("sequence.string");
+    file_str << read_sequence;
+    std::cout << "Save string read_sequence into sequence.string file." << std::endl;
 
     // align events to the basecalled read
     std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(*this, *this->base_model[strand_idx], read_sequence);

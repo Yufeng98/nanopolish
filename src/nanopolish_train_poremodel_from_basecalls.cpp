@@ -220,7 +220,7 @@ int train_poremodel_from_basecalls_main(int argc, char** argv)
     std::vector<SquiggleRead*> reads;
     while(getline(fofn_reader, fast5_name)) {
         fprintf(stderr, "Loading %s\n", fast5_name.c_str());
-        SquiggleRead* read = new SquiggleRead(fast5_name, fast5_name, false, SRF_NO_MODEL);
+        SquiggleRead* read = new SquiggleRead(fast5_name, fast5_name, false, false, SRF_NO_MODEL);
      
         // initialize the scaling parameters to defaults
         PoreModel& read_pore_model = read->pore_model[training_strand];

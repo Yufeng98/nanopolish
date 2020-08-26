@@ -194,7 +194,7 @@ void phase_single_read(const ReadDB& read_db,
     std::string read_name = bam_get_qname(record);
 
     // load read
-    SquiggleRead sr(read_name, read_db, false);
+    SquiggleRead sr(read_name, read_db, false, false);
 
     std::string ref_name = hdr->target_name[record->core.tid];
     int alignment_start_pos = record->core.pos;
