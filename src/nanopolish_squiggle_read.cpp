@@ -67,7 +67,7 @@ void SquiggleScalings::set6(double _shift,
 }
 
 //
-SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const uint32_t flags)
+SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_class, const uint32_t flags)
 {
     this->fast5_path = read_db.get_signal_path(name);
     g_total_reads += 1;
@@ -79,7 +79,7 @@ SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const
     std::string sequence = read_db.get_read_sequence(name);
     Fast5Data data = Fast5Loader::load_read(fast5_path, name);
     if(data.is_valid && !sequence.empty()) {
-        init(sequence, data, flags);
+        init(sequence, data, save_class, flags);
     } else {
         fprintf(stderr, "[warning] fast5 file is unreadable and will be skipped: %s\n", fast5_path.c_str());
         g_bad_fast5_file += 1;
@@ -92,18 +92,18 @@ SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const
     data.rt.raw = NULL;
 }
 
-SquiggleRead::SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const uint32_t flags)
+SquiggleRead::SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_class, const uint32_t flags)
 {
-    init(read_db.get_read_sequence(data.read_name), data, flags);
+    init(read_db.get_read_sequence(data.read_name), data, save_class, flags);
 }
 
-SquiggleRead::SquiggleRead(const std::string& sequence, const Fast5Data& data, const uint32_t flags)
+SquiggleRead::SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_class, const uint32_t flags)
 {
-    init(sequence, data, flags);
+    init(sequence, data, save_class, flags);
 }
 
 //
-void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data, const uint32_t flags)
+void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data, const bool save_class, const uint32_t flags)
 {
     this->nucleotide_type = SRNT_DNA;
     this->pore_type = PT_UNKNOWN;
@@ -120,7 +120,7 @@ void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data,
     // also there can be rare issues with the signal in the fast5 and we want to skip
     // such reads
     if(this->read_sequence.length() > 20 && data.is_valid && data.rt.n > 0) {
-        load_from_raw(data, flags);
+        load_from_raw(save_class, data, flags);
     } else {
         g_bad_fast5_file += 1;
     }
@@ -271,7 +271,7 @@ void SquiggleRead::load_from_events(const uint32_t flags)
 }
 
 //
-void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t flags)
+void SquiggleRead::load_from_raw(const bool save_class, const Fast5Data& fast5_data, const uint32_t flags)
 {
 
     // Try to detect whether this read is DNA or RNA

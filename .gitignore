@@ -19,5 +19,7 @@ share/
 
 hdf5-1.*.tar.gz
 eigen-3.*.tar.bz2
+
 eigen/
 local*
+*.json
