@@ -180,8 +180,8 @@ namespace opt
     static int min_separation = 10;
     static int min_flank = 10;
     static int min_mapping_quality = 20;
-    static bool save_class = false;
-    static bool load_class = false;
+    static bool save_file = false;
+    static bool load_file = false;
 }
 
 static const char* shortopts = "l:s:r:b:g:t:w:m:K:q:c:i:vn";
@@ -803,8 +803,8 @@ void parse_call_methylation_options(int argc, char** argv)
             case 'K': arg >> opt::batch_size; break;
             case 'c': arg >> opt::watch_process_total; break;
             case 'i': arg >> opt::watch_process_index; break;
-            case 's': opt::save_class = true; break;
-            case 'l': opt::load_class = true; break;
+            case 's': opt::save_file = true; break;
+            case 'l': opt::load_file = true; break;
             case OPT_MIN_SEPARATION: arg >> opt::min_separation; break;
             case OPT_WATCH_DIR: arg >> opt::watch_dir; break;
             case OPT_WATCH_WRITE_BAM: opt::watch_write_bam = true; break;

@@ -70,7 +70,7 @@ void SquiggleScalings::set6(double _shift,
 }
 
 //
-SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_class, const bool load_class, const uint32_t flags)
+SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_file, const bool load_file, const uint32_t flags)
 {
     this->fast5_path = read_db.get_signal_path(name);
     g_total_reads += 1;
@@ -82,7 +82,7 @@ SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const
     std::string sequence = read_db.get_read_sequence(name);
     Fast5Data data = Fast5Loader::load_read(fast5_path, name);
     if(data.is_valid && !sequence.empty()) {
-        init(sequence, data, save_class, load_class, flags);
+        init(sequence, data, save_file, load_file, flags);
     } else {
         fprintf(stderr, "[warning] fast5 file is unreadable and will be skipped: %s\n", fast5_path.c_str());
         g_bad_fast5_file += 1;
@@ -95,18 +95,18 @@ SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const
     data.rt.raw = NULL;
 }
 
-SquiggleRead::SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_class, const bool load_class, const uint32_t flags)
+SquiggleRead::SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags)
 {
-    init(read_db.get_read_sequence(data.read_name), data, save_class, load_class, flags);
+    init(read_db.get_read_sequence(data.read_name), data, save_file, load_file, flags);
 }
 
-SquiggleRead::SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_class, const bool load_class, const uint32_t flags)
+SquiggleRead::SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags)
 {
-    init(sequence, data, save_class, load_class, flags);
+    init(sequence, data, save_file, load_file, flags);
 }
 
 //
-void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data, const bool save_class, const bool load_class, const uint32_t flags)
+void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags)
 {
     this->nucleotide_type = SRNT_DNA;
     this->pore_type = PT_UNKNOWN;
@@ -119,11 +119,14 @@ void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data,
     this->read_name = data.read_name;
     this->read_sequence = read_sequence;
 
+    this->save_file = save_file;
+    this->load_file = load_file;
+
     // sometimes the basecaller will emit very short sequences, which causes problems
     // also there can be rare issues with the signal in the fast5 and we want to skip
     // such reads
     if(this->read_sequence.length() > 20 && data.is_valid && data.rt.n > 0) {
-        load_from_raw(save_class, data, flags);
+        load_from_raw(data, flags);
     } else {
         g_bad_fast5_file += 1;
     }
@@ -273,8 +276,41 @@ void SquiggleRead::load_from_events(const uint32_t flags)
     }
 }
 
+// SquiggleRead SquiggleRead::Load_class_from_file()
+// {
+//     if (this->save_file) {
+//         // save input of the most time consuming function: adaptive_banded_simple_event_align
+//         std::ofstream file_obj;
+//         file_obj.open("squiggleRead.class");
+//         file_obj.write((char*)&(*this), sizeof(*this));
+//         std::cout << "Save class SquiggleRead into squiggle.class file." << std::endl;
+
+//         // save read_sequence
+//         std::ofstream file_str("sequence.string");
+//         file_str << read_sequence;
+//         std::cout << "Save string read_sequence into sequence.string file." << std::endl;
+
+//         return *this;
+
+//     } else if (this->load_file) {
+//         // load input of the most time consuming function: adaptive_banded_simple_event_align
+//         std::ifstream file_obj;
+//         SquiggleRead obj;
+//         file_obj.open("squiggleRead.class");
+//         file_obj.read((char*)&obj, sizeof(obj));
+//         std::cout << "Load class SquiggleRead into squiggle.class file." << std::endl;
+
+//         // load read_sequence
+//         std::ifstream file_str("sequence.string");
+//         std::string read_seq;
+//         file_str >> read_seq;
+//         std::cout << "Load string read_sequence into sequence.string file." << std::endl;
+
+//         return obj;
+// }
+
 //
-void SquiggleRead::load_from_raw(const bool save_class, const Fast5Data& fast5_data, const uint32_t flags)
+void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t flags)
 {
 
     // Try to detect whether this read is DNA or RNA
@@ -354,19 +390,42 @@ void SquiggleRead::load_from_raw(const bool save_class, const Fast5Data& fast5_d
     assert(et.event != NULL);
     free(et.event);
 
-    // save input of the most time consuming function: adaptive_banded_simple_event_align
-    std::ofstream file_obj;
-    file_obj.open("ssquiggleRead.class");
-    file_obj.write((char*)&(*this), sizeof(*this));
-    std::cout << "Save class SquiggleRead into squiggle.class file." << std::endl;
+    SquiggleRead object;
 
-    // save read_sequence
-    std::ofstream file_str("sequence.string");
-    file_str << read_sequence;
-    std::cout << "Save string read_sequence into sequence.string file." << std::endl;
+    if (this->save_file) {
+        // save input of the most time consuming function: adaptive_banded_simple_event_align
+        std::ofstream file_obj;
+        file_obj.open("squiggleRead.class");
+        file_obj.write((char*)&(*this), sizeof(*this));
+        std::cout << "Save class SquiggleRead into squiggle.class file." << std::endl;
+
+        // save read_sequence
+        std::ofstream file_str("sequence.string");
+        file_str << read_sequence;
+        std::cout << "Save string read_sequence into sequence.string file." << std::endl;
+
+        object = *this;
+
+    } else if (this->load_file) {
+        // load input of the most time consuming function: adaptive_banded_simple_event_align
+        std::ifstream file_obj;
+        SquiggleRead obj;
+        file_obj.open("squiggleRead.class");
+        file_obj.read((char*)&obj, sizeof(obj));
+        std::cout << "Load class SquiggleRead into squiggle.class file." << std::endl;
+
+        // load read_sequence
+        std::ifstream file_str("sequence.string");
+        std::string read_seq;
+        file_str >> read_seq;
+        std::cout << "Load string read_sequence into sequence.string file." << std::endl;
+
+        object = obj;
+    
+    }
 
     // align events to the basecalled read
-    std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(*this, *this->base_model[strand_idx], read_sequence);
+    std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(object, *object.base_model[strand_idx], read_sequence);
 
     // transform alignment into the base-to-event map
     if(event_alignment.size() > 0) {

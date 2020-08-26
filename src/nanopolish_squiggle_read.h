@@ -112,15 +112,15 @@ class SquiggleRead
     public:
 
         SquiggleRead() {} // legacy TODO remove
-        SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_class = false, const bool load_class = false, const uint32_t flags = 0);
-        SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_class = false, const bool load_class = false, const uint32_t flags = 0);
-        SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_class = false, const bool load_class = false, const uint32_t flags = 0);
+        SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_file = false, const bool load_file = false, const uint32_t flags = 0);
+        SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_file = false, const bool load_file = false, const uint32_t flags = 0);
+        SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_file = false, const bool load_file = false, const uint32_t flags = 0);
         ~SquiggleRead();
 
         //
         // I/O
         //
-        void init(const std::string& read_sequence, const Fast5Data& data, const bool save_class, const bool load_class, const uint32_t flags);
+        void init(const std::string& read_sequence, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags);
 
         //
         // Access to data
@@ -264,6 +264,9 @@ class SquiggleRead
         // Data
         //
 
+        // flag for profile
+        bool save_file, load_file;
+
         // unique identifier of the read
         std::string read_name;
         SquiggleReadType read_type;
@@ -298,6 +301,8 @@ class SquiggleRead
         // one set of parameters per strand
         TransitionParameters parameters[2];
 
+        SquiggleRead Load_class_from_file() {}
+
     private:
         // private data
         fast5::File* f_p;
@@ -309,7 +314,7 @@ class SquiggleRead
         void load_from_events(const uint32_t flags);
 
         // Load all read data from raw samples
-        void load_from_raw(const bool save_class, const Fast5Data& fast5_data, const uint32_t flags);
+        void load_from_raw(const Fast5Data& fast5_data, const uint32_t flags);
 
         // Version-specific intialization functions
         void _load_R7(uint32_t si);
