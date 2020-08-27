@@ -357,7 +357,8 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
     assert(et.event != NULL);
     free(et.event);
 
-    SquiggleRead object;
+    // SquiggleRead object;
+    std::cout << this->save_file << std::endl;
 
     if (this->save_file) {
         // save input of the most time consuming function: adaptive_banded_simple_event_align
@@ -371,28 +372,30 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
         file_str << read_sequence;
         std::cout << "Save string read_sequence into sequence.string file." << std::endl;
 
-        object = *this;
+    //     object = *this;
 
-    } else if (this->load_file) {
-        // load input of the most time consuming function: adaptive_banded_simple_event_align
-        std::ifstream file_obj;
-        SquiggleRead obj;
-        file_obj.open("squiggleRead.class");
-        file_obj.read((char*)&obj, sizeof(obj));
-        std::cout << "Load class SquiggleRead into squiggle.class file." << std::endl;
+    // } else if (this->load_file) {
+    //     // load input of the most time consuming function: adaptive_banded_simple_event_align
+    //     std::ifstream file_obj;
+    //     SquiggleRead obj;
+    //     file_obj.open("squiggleRead.class");
+    //     file_obj.read((char*)&obj, sizeof(obj));
+    //     std::cout << "Load class SquiggleRead into squiggle.class file." << std::endl;
 
-        // load read_sequence
-        std::ifstream file_str("sequence.string");
-        std::string read_seq;
-        file_str >> read_seq;
-        std::cout << "Load string read_sequence into sequence.string file." << std::endl;
+    //     // load read_sequence
+    //     std::ifstream file_str("sequence.string");
+    //     std::string read_seq;
+    //     file_str >> read_seq;
+    //     std::cout << "Load string read_sequence into sequence.string file." << std::endl;
 
-        object = obj;
+    //     object = obj;
     
     }
 
-    // align events to the basecalled read
-    std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(object, *object.base_model[strand_idx], read_sequence);
+    // // align events to the basecalled read
+    // std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(object, *object.base_model[strand_idx], read_sequence);
+
+    std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(*this, *this->base_model[strand_idx], read_sequence);
 
     // transform alignment into the base-to-event map
     if(event_alignment.size() > 0) {
