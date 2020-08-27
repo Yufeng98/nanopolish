@@ -276,39 +276,6 @@ void SquiggleRead::load_from_events(const uint32_t flags)
     }
 }
 
-// SquiggleRead SquiggleRead::Load_class_from_file()
-// {
-//     if (this->save_file) {
-//         // save input of the most time consuming function: adaptive_banded_simple_event_align
-//         std::ofstream file_obj;
-//         file_obj.open("squiggleRead.class");
-//         file_obj.write((char*)&(*this), sizeof(*this));
-//         std::cout << "Save class SquiggleRead into squiggle.class file." << std::endl;
-
-//         // save read_sequence
-//         std::ofstream file_str("sequence.string");
-//         file_str << read_sequence;
-//         std::cout << "Save string read_sequence into sequence.string file." << std::endl;
-
-//         return *this;
-
-//     } else if (this->load_file) {
-//         // load input of the most time consuming function: adaptive_banded_simple_event_align
-//         std::ifstream file_obj;
-//         SquiggleRead obj;
-//         file_obj.open("squiggleRead.class");
-//         file_obj.read((char*)&obj, sizeof(obj));
-//         std::cout << "Load class SquiggleRead into squiggle.class file." << std::endl;
-
-//         // load read_sequence
-//         std::ifstream file_str("sequence.string");
-//         std::string read_seq;
-//         file_str >> read_seq;
-//         std::cout << "Load string read_sequence into sequence.string file." << std::endl;
-
-//         return obj;
-// }
-
 //
 void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t flags)
 {
