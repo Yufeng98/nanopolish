@@ -301,8 +301,6 @@ class SquiggleRead
         // one set of parameters per strand
         TransitionParameters parameters[2];
 
-        SquiggleRead Load_class_from_file() {}
-
     private:
         // private data
         fast5::File* f_p;
