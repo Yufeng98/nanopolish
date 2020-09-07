@@ -94,6 +94,7 @@ CPPFLAGS += $(H5_INCLUDE) $(HTS_INCLUDE) $(MINIMAP2_INCLUDE) $(FAST5_INCLUDE) $(
 # Main programs to build
 PROGRAM = nanopolish
 TEST_PROGRAM = nanopolish_test
+RUN_ALIGN = run_align
 
 .PHONY: all
 all: depend $(PROGRAM)
@@ -140,6 +141,7 @@ EXE_SRC = src/main/nanopolish.cpp src/test/nanopolish_test.cpp
 
 # Automatically generated object names
 CPP_OBJ = $(CPP_SRC:.cpp=.o)
+CPP_OBJ := $(filter-out src/run_align.o, $(CPP_OBJ))
 C_OBJ = $(C_SRC:.c=.o)
 
 # Generate dependencies
@@ -157,6 +159,10 @@ depend: .depend
 
 .c.o:
 	$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $(H5_INCLUDE) -fPIC $<
+
+$(RUN_ALIGN): src/run_align.o $(CPP_OBJ) $(C_OBJ) $(HTS_LIB) $(MINIMAP2_LIB) $(H5_LIB) $(EIGEN_CHECK)
+	echo $(CPP_OBJ)
+	$(CXX) -o $@ $(CXXFLAGS) $(CPPFLAGS) -fPIC $< $(CPP_OBJ) $(C_OBJ) $(HTS_LIB) $(MINIMAP2_LIB) $(H5_LIB) $(LIBS) $(LDFLAGS)
 
 # Link main executable
 $(PROGRAM): src/main/nanopolish.o $(CPP_OBJ) $(C_OBJ) $(HTS_LIB) $(MINIMAP2_LIB) $(H5_LIB) $(EIGEN_CHECK)

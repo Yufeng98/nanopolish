@@ -24,3 +24,6 @@ eigen/
 local*
 *.json
 script.sh
+
+# profile
+run_align

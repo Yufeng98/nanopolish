@@ -18,6 +18,7 @@
 #include "nanopolish_raw_loader.h"
 #include "nanopolish_fast5_io.h"
 #include "nanopolish_fast5_loader.h"
+#include <stdio.h>
 
 extern "C" {
 #include "event_detection.h"
@@ -361,41 +362,104 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
     std::cout << this->save_file << std::endl;
 
     if (this->save_file) {
-        // save input of the most time consuming function: adaptive_banded_simple_event_align
-        std::ofstream file_obj;
-        file_obj.open("squiggleRead.class");
-        file_obj.write((char*)&(*this), sizeof(*this));
-        std::cout << "Save class SquiggleRead into squiggle.class file." << std::endl;
 
-        // save read_sequence
-        std::ofstream file_str("sequence.string");
-        file_str << read_sequence;
-        std::cout << "Save string read_sequence into sequence.string file." << std::endl;
+        std::ofstream file1;
+        file1.open("test_save", std::fstream::binary);
 
-    //     object = *this;
+        file1.write((char*)&k, sizeof(k));
+        file1.write((char*)&this->scalings[strand_idx], sizeof(this->scalings[strand_idx]));
 
-    // } else if (this->load_file) {
-    //     // load input of the most time consuming function: adaptive_banded_simple_event_align
-    //     std::ifstream file_obj;
-    //     SquiggleRead obj;
-    //     file_obj.open("squiggleRead.class");
-    //     file_obj.read((char*)&obj, sizeof(obj));
-    //     std::cout << "Load class SquiggleRead into squiggle.class file." << std::endl;
+        uint32_t n_events = this->events[strand_idx].size();
+        file1.write((char*)&n_events, sizeof(n_events));
+        for (uint32_t i = 0; i <= n_events; i++) {
+            file1.write((char*)&this->events[strand_idx][i], sizeof(this->events[strand_idx][i]));
+        }
 
-    //     // load read_sequence
-    //     std::ifstream file_str("sequence.string");
-    //     std::string read_seq;
-    //     file_str >> read_seq;
-    //     std::cout << "Load string read_sequence into sequence.string file." << std::endl;
+        uint32_t n_states = this->base_model[strand_idx]->states.size();
+        file1.write((char*)&n_states, sizeof(n_states));
+        for (uint32_t i = 0; i <= n_states; i++) {
+            file1.write((char*)&this->base_model[strand_idx]->states[i], sizeof(this->base_model[strand_idx]->states[i]));
+        }
 
-    //     object = obj;
-    
+        file1.write((char*)&read_sequence, sizeof(read_sequence));
+
+        file1.close();
+
+
+        // FILE *fp;
+        // fp = fopen("align_parameter_nanopolish", "w+");
+        // if(fp==NULL) {
+        //     printf("File cannot open! " ); 
+        //     exit(0);
+        // }
+
+        // uint32_t n_events = this->events[strand_idx].size();
+        // struct SquiggleEvent* events = (struct SquiggleEvent*)malloc(sizeof(struct SquiggleEvent) * n_events); 
+        // for (uint32_t i = 0; i <= n_events; i++) {
+        //     events[i] = {this->events[strand_idx][i].mean, this->events[strand_idx][i].stdv, this->events[strand_idx][i].start_time,
+        //                  this->events[strand_idx][i].duration, this->events[strand_idx][i].log_stdv};
+        // }
+
+        // uint32_t n_status = this->base_model[strand_idx]->states.size();
+        // struct PoreModelStateParams* states = (struct PoreModelStateParams*)malloc(sizeof(struct PoreModelStateParams) * n_events);
+        // for (uint32_t i = 0; i <= n_status; i++) {
+        //     states[i] = {this->base_model[strand_idx]->states[i].level_mean, this->base_model[strand_idx]->states[i].level_stdv,
+        //                  this->base_model[strand_idx]->states[i].sd_mean, this->base_model[strand_idx]->states[i].sd_stdv,
+        //                  this->base_model[strand_idx]->states[i].level_log_stdv, this->base_model[strand_idx]->states[i].sd_lambda,
+        //                  this->base_model[strand_idx]->states[i].sd_log_lambda};
+        // }
+
+        // fwrite(&k, sizeof(size_t), 1, fp);
+        // fwrite(&n_events, sizeof(uint32_t), 1, fp);
+        // fwrite(events, sizeof(SquiggleEvent), n_events, fp);
+        // fwrite(&this->scalings[strand_idx], sizeof(SquiggleScalings), 1, fp);
+        // fwrite(&n_status, sizeof(uint32_t), 1, fp);
+        // fwrite(states, sizeof(PoreModelStateParams), n_status, fp);
+
+        // fclose(fp);
+
+        // free(events);
+        // free(states);
+
     }
 
-    // // align events to the basecalled read
-    // std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(object, *object.base_model[strand_idx], read_sequence);
-
+    // align events to the basecalled read
     std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(*this, *this->base_model[strand_idx], read_sequence);
+
+    if (this->save_file) {
+
+        std::ofstream file1;
+        file1.open("test_save_result", std::fstream::binary);
+
+        uint32_t n_event_alignments = event_alignment.size();
+        file1.write((char*)&n_event_alignments, sizeof(n_event_alignments));
+        for (uint32_t i = 0; i <= n_event_alignments; i++) {
+            file1.write((char*)&event_alignment[i], sizeof(event_alignment[i]));
+        }
+
+        file1.close();
+        
+    //     FILE *fp;
+    //     fp = fopen("align_result_nanopolish", "w+");
+    //     if(fp==NULL) {
+    //         printf("File cannot open! " ); 
+    //         exit(0);
+    //     }
+
+    //     uint32_t n_event_alignments = event_alignment.size() * 0.2;
+    //     struct AlignedPair* event_alignments = (struct AlignedPair*)malloc(sizeof(struct AlignedPair) * n_event_alignments);
+    //     for (uint32_t i = 0; i <= n_event_alignments; i++) {
+    //         event_alignments[i] = {event_alignment[i].ref_pos, event_alignment[i].read_pos};
+    //     }
+
+    //     fwrite(&n_event_alignments, sizeof(uint32_t), 1, fp);
+    //     fwrite(event_alignments, sizeof(PoreModelStateParams), n_event_alignments, fp);
+
+    //     fclose(fp);
+
+    //     free(event_alignments);
+
+    }
 
     // transform alignment into the base-to-event map
     if(event_alignment.size() > 0) {
