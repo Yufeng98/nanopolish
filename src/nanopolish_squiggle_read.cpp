@@ -364,7 +364,7 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
     if (this->save_file) {
 
         std::ofstream file1;
-        file1.open("test_save", std::fstream::binary);
+        file1.open("align_parameter_nanopolish", std::fstream::binary);
 
         file1.write((char*)&k, sizeof(k));
         file1.write((char*)&this->scalings[strand_idx], sizeof(this->scalings[strand_idx]));
@@ -429,7 +429,7 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
     if (this->save_file) {
 
         std::ofstream file1;
-        file1.open("test_save_result", std::fstream::binary);
+        file1.open("align_result_nanopolish", std::fstream::binary);
 
         uint32_t n_event_alignments = event_alignment.size();
         file1.write((char*)&n_event_alignments, sizeof(n_event_alignments));
