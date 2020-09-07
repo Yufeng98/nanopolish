@@ -19,6 +19,9 @@ struct AlignedPair
 {
     int ref_pos;
     int read_pos;
+    bool operator == (AlignedPair &rhs) {
+            return (ref_pos == rhs.ref_pos && read_pos == rhs.read_pos);
+        }
 };
 
 struct AlignedPairRefLBComp

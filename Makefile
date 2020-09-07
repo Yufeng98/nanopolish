@@ -8,8 +8,8 @@ SUBDIRS := src src/hmm src/thirdparty src/thirdparty/scrappie src/common src/ali
 #
 
 #Basic flags every build needs
-LIBS = -lz
-CXXFLAGS ?= -g -O3
+LIBS = -lz      # libz is Zlib, a compression library which can do gzip, deflate, and a few other formats
+CXXFLAGS ?= -g -O0      # ?= means only if it's not set/
 CXXFLAGS += -std=c++11 -fopenmp -fsigned-char -D_FILE_OFFSET_BITS=64 #D_FILE_OFFSET_BITS=64 makes nanopolish work in 32 bit systems
 CFLAGS ?= -O3 -std=c99 -fsigned-char -D_FILE_OFFSET_BITS=64
 LDFLAGS ?=
@@ -34,7 +34,7 @@ endif
 # Default to automatically installing hdf5
 ifeq ($(HDF5), install)
     H5_LIB = ./lib/libhdf5.a
-    H5_INCLUDE = -I./include
+    H5_INCLUDE = -I./include    # adds a directory to the list of places searched by the compiler for a file named on a #include line
     LIBS += -ldl
 else
     # Use system-wide hdf5
@@ -93,6 +93,7 @@ CPPFLAGS += $(H5_INCLUDE) $(HTS_INCLUDE) $(MINIMAP2_INCLUDE) $(FAST5_INCLUDE) $(
 # Main programs to build
 PROGRAM = nanopolish
 TEST_PROGRAM = nanopolish_test
+RUN_ALIGN = run_align
 
 .PHONY: all
 all: depend $(PROGRAM)
@@ -139,6 +140,7 @@ EXE_SRC = src/main/nanopolish.cpp src/test/nanopolish_test.cpp
 
 # Automatically generated object names
 CPP_OBJ = $(CPP_SRC:.cpp=.o)
+CPP_OBJ := $(filter-out src/run_align.o, $(CPP_OBJ))
 C_OBJ = $(C_SRC:.c=.o)
 
 # Generate dependencies
@@ -153,8 +155,13 @@ depend: .depend
 .cpp.o:
 	$(CXX) -o $@ -c $(CXXFLAGS) $(CPPFLAGS) -fPIC $<
 
+
 .c.o:
 	$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $(H5_INCLUDE) -fPIC $<
+
+$(RUN_ALIGN): src/run_align.o $(CPP_OBJ) $(C_OBJ) $(HTS_LIB) $(MINIMAP2_LIB) $(H5_LIB) $(EIGEN_CHECK)
+	echo $(CPP_OBJ)
+	$(CXX) -o $@ $(CXXFLAGS) $(CPPFLAGS) -fPIC $< $(CPP_OBJ) $(C_OBJ) $(HTS_LIB) $(MINIMAP2_LIB) $(H5_LIB) $(LIBS) $(LDFLAGS)
 
 # Link main executable
 $(PROGRAM): src/main/nanopolish.o $(CPP_OBJ) $(C_OBJ) $(HTS_LIB) $(MINIMAP2_LIB) $(H5_LIB) $(EIGEN_CHECK)

@@ -156,6 +156,8 @@ static const char *CALL_METHYLATION_USAGE_MESSAGE =
 "                                       files when X mod TOTAL == IDX, where X is the suffix of the fast5 file.\n"
 "      --progress                       print out a progress message\n"
 "  -K  --batchsize=NUM                  the batch size (default: 512)\n"
+"  -s  --save-class=true                save intermiate classes: SquiggleRead\n"
+"  -l  --load-class=true                load intermiate classes: SquiggleRead\n"
 "\nReport bugs to " PACKAGE_BUGREPORT "\n\n";
 
 namespace opt
@@ -178,9 +180,11 @@ namespace opt
     static int min_separation = 10;
     static int min_flank = 10;
     static int min_mapping_quality = 20;
+    static bool save_file = false;
+    static bool load_file = false;
 }
 
-static const char* shortopts = "r:b:g:t:w:m:K:q:c:i:vn";
+static const char* shortopts = "l:s:r:b:g:t:w:m:K:q:c:i:vn";
 
 enum { OPT_HELP = 1, OPT_VERSION, OPT_PROGRESS, OPT_MIN_SEPARATION, OPT_WATCH_DIR, OPT_WATCH_WRITE_BAM };
 
@@ -202,6 +206,8 @@ static const struct option longopts[] = {
     { "help",                 no_argument,       NULL, OPT_HELP },
     { "version",              no_argument,       NULL, OPT_VERSION },
     { "batchsize",            no_argument,       NULL, 'K' },
+    { "save-class",           no_argument,       NULL, 's' },
+    { "load-class",           no_argument,       NULL, 'l' },
     { NULL, 0, NULL, 0 }
 };
 
@@ -408,7 +414,7 @@ void calculate_methylation_for_read_from_bam(const OutputHandles& handles,
 {
     // Load a squiggle read for the mapped read
     std::string read_name = bam_get_qname(record);
-    SquiggleRead sr(read_name, read_db);
+    SquiggleRead sr(read_name, read_db, opt::save_file, opt::load_file);
     calculate_methylation_for_read(handles, sr, fai, hdr, record, read_idx, region_start, region_end);
 }
 
@@ -797,6 +803,8 @@ void parse_call_methylation_options(int argc, char** argv)
             case 'K': arg >> opt::batch_size; break;
             case 'c': arg >> opt::watch_process_total; break;
             case 'i': arg >> opt::watch_process_index; break;
+            case 's': opt::save_file = true; break;
+            case 'l': opt::load_file = true; break;
             case OPT_MIN_SEPARATION: arg >> opt::min_separation; break;
             case OPT_WATCH_DIR: arg >> opt::watch_dir; break;
             case OPT_WATCH_WRITE_BAM: opt::watch_write_bam = true; break;

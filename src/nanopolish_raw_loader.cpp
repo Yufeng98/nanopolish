@@ -330,7 +330,6 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
     int curr_gap = 0;
     int max_gap = 0;
     while(curr_kmer_idx >= 0 && curr_event_idx >= 0) {
-
         // emit alignment
         out.push_back({curr_kmer_idx, curr_event_idx});
 #ifdef DEBUG_ADAPTIVE
@@ -345,6 +344,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
         size_t offset = band_event_to_offset(band_idx, curr_event_idx);
         assert(band_kmer_to_offset(band_idx, curr_kmer_idx) == offset);
 
+        uint8_t from1 = TRACE_ARRAY(band_idx,offset);
         uint8_t from = TRACE_ARRAY(band_idx,offset);
         if(from == FROM_D) {
             curr_kmer_idx -= 1;

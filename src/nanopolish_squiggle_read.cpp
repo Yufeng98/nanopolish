@@ -6,6 +6,9 @@
 // nanopolish_squiggle_read -- Class holding a squiggle (event)
 // space nanopore read
 //
+#include <iostream>
+#include <fstream>
+#include <string>
 #include <algorithm>
 #include "nanopolish_common.h"
 #include "nanopolish_squiggle_read.h"
@@ -15,6 +18,7 @@
 #include "nanopolish_raw_loader.h"
 #include "nanopolish_fast5_io.h"
 #include "nanopolish_fast5_loader.h"
+#include <stdio.h>
 
 extern "C" {
 #include "event_detection.h"
@@ -67,7 +71,7 @@ void SquiggleScalings::set6(double _shift,
 }
 
 //
-SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const uint32_t flags)
+SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_file, const bool load_file, const uint32_t flags)
 {
     this->fast5_path = read_db.get_signal_path(name);
     g_total_reads += 1;
@@ -79,7 +83,7 @@ SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const
     std::string sequence = read_db.get_read_sequence(name);
     Fast5Data data = Fast5Loader::load_read(fast5_path, name);
     if(data.is_valid && !sequence.empty()) {
-        init(sequence, data, flags);
+        init(sequence, data, save_file, load_file, flags);
     } else {
         fprintf(stderr, "[warning] fast5 file is unreadable and will be skipped: %s\n", fast5_path.c_str());
         g_bad_fast5_file += 1;
@@ -92,18 +96,18 @@ SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const
     data.rt.raw = NULL;
 }
 
-SquiggleRead::SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const uint32_t flags)
+SquiggleRead::SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags)
 {
-    init(read_db.get_read_sequence(data.read_name), data, flags);
+    init(read_db.get_read_sequence(data.read_name), data, save_file, load_file, flags);
 }
 
-SquiggleRead::SquiggleRead(const std::string& sequence, const Fast5Data& data, const uint32_t flags)
+SquiggleRead::SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags)
 {
-    init(sequence, data, flags);
+    init(sequence, data, save_file, load_file, flags);
 }
 
 //
-void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data, const uint32_t flags)
+void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags)
 {
     this->nucleotide_type = SRNT_DNA;
     this->pore_type = PT_UNKNOWN;
@@ -115,6 +119,9 @@ void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data,
 
     this->read_name = data.read_name;
     this->read_sequence = read_sequence;
+
+    this->save_file = save_file;
+    this->load_file = load_file;
 
     // sometimes the basecaller will emit very short sequences, which causes problems
     // also there can be rare issues with the signal in the fast5 and we want to skip
@@ -351,8 +358,52 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
     assert(et.event != NULL);
     free(et.event);
 
+    if (this->save_file) {
+
+        std::ofstream file1;
+        file1.open("align_parameter_nanopolish", std::fstream::binary);
+
+        file1.write((char*)&k, sizeof(k));
+        file1.write((char*)&this->scalings[strand_idx], sizeof(this->scalings[strand_idx]));
+
+        uint32_t n_events = this->events[strand_idx].size();
+        file1.write((char*)&n_events, sizeof(n_events));
+        for (uint32_t i = 0; i <= n_events; i++) {
+            file1.write((char*)&this->events[strand_idx][i], sizeof(this->events[strand_idx][i]));
+        }
+
+        uint32_t n_states = this->base_model[strand_idx]->states.size();
+        file1.write((char*)&n_states, sizeof(n_states));
+        for (uint32_t i = 0; i <= n_states; i++) {
+            file1.write((char*)&this->base_model[strand_idx]->states[i], sizeof(this->base_model[strand_idx]->states[i]));
+        }
+
+        uint32_t sequence_len = read_sequence.length();
+        file1.write((char*)&sequence_len, sizeof(sequence_len));
+        file1.write(read_sequence.c_str(), sequence_len);
+        // file1 << read_sequence;
+
+        file1.close();
+
+    }
+
     // align events to the basecalled read
     std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(*this, *this->base_model[strand_idx], read_sequence);
+
+    if (this->save_file) {
+
+        std::ofstream file1;
+        file1.open("align_result_nanopolish", std::fstream::binary);
+
+        uint32_t n_event_alignments = event_alignment.size();
+        file1.write((char*)&n_event_alignments, sizeof(n_event_alignments));
+        for (uint32_t i = 0; i <= n_event_alignments; i++) {
+            file1.write((char*)&event_alignment[i], sizeof(event_alignment[i]));
+        }
+
+        file1.close();
+
+    }
 
     // transform alignment into the base-to-event map
     if(event_alignment.size() > 0) {
