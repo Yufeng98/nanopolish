@@ -470,7 +470,7 @@ int main() {
 
     std::ifstream file2;
 
-    file2.open("align_result_nanopolishs", std::fstream::binary);
+    file2.open("align_result_nanopolish", std::fstream::binary);
     std::vector<AlignedPair> event_alignments;
     AlignedPair event_alignment;
     uint32_t n_event_alignments;
