@@ -433,7 +433,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(size_t k, std::vecto
 int main() {
 
     std::ifstream file1;
-    file1.open("test_save", std::fstream::binary);
+    file1.open("align_parameter_nanopolish", std::fstream::binary);
 
     size_t k;
     SquiggleScalings scalings;
@@ -470,7 +470,7 @@ int main() {
 
     std::ifstream file2;
 
-    file2.open("test_save_result", std::fstream::binary);
+    file2.open("align_result_nanopolishs", std::fstream::binary);
     std::vector<AlignedPair> event_alignments;
     AlignedPair event_alignment;
     uint32_t n_event_alignments;
