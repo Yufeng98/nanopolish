@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <ctime>
 #include "nanopolish_common.h"
 #include "nanopolish_squiggle_read.h"
 #include "nanopolish_pore_model_set.h"
@@ -34,57 +35,20 @@ extern "C" {
 #define BAND_ARRAY(r, c) ( bands[((r)*(ALN_BANDWIDTH)+(c))] )
 #define TRACE_ARRAY(r, c) ( trace[((r)*(ALN_BANDWIDTH)+(c))] )
 
-inline float get_unscaled_level(std::vector<SquiggleEvent> events, uint32_t event_idx, uint32_t strand)
-{
-    return events[event_idx].mean;
-}
-
-inline float get_time(std::vector<SquiggleEvent> events, uint32_t event_idx, uint32_t strand)
-{
-    return events[event_idx].start_time - events[0].start_time;
-}
-
-inline float get_drift_scaled_level(std::vector<SquiggleEvent> events, SquiggleScalings scalings, 
-                                    uint32_t event_idx, uint32_t strand)
-{
-    float level = get_unscaled_level(events, event_idx, strand);
-    float time = get_time(events, event_idx, strand);
-    return level - time * scalings.drift;
-}
-
-inline GaussianParameters get_scaled_gaussian_from_pore_model_state(SquiggleScalings scalings, 
-                                                                    std::vector<PoreModelStateParams> states, 
-                                                                    size_t strand_idx, 
-                                                                    size_t rank)
-{
-    // const SquiggleScalings& scalings = scalings;
-    const PoreModelStateParams& params = states[rank];
-    GaussianParameters gp;
-    gp.mean = scalings.scale * params.level_mean + scalings.shift;
-    gp.stdv = params.level_stdv * scalings.var;
-    gp.log_stdv = params.level_log_stdv + scalings.log_var;
-    return gp;
-}
-
-static const float log_inv_sqrt_2pi = log(0.3989422804014327);
-
-inline float log_normal_pdf(float x, const GaussianParameters& g)
-{
-    float a = (x - g.mean) / g.stdv;
-    return log_inv_sqrt_2pi - g.log_stdv + (-0.5f * a * a);
-}
-
-inline float log_probability_match_r9(std::vector<SquiggleEvent> events,
+inline float log_probability_match_r9(SquiggleEvent event,
+                                      SquiggleEvent event_0,
                                       SquiggleScalings scalings,
-                                      std::vector<PoreModelStateParams> states,
-                                      uint32_t kmer_rank,
-                                      uint32_t event_idx,
-                                      uint8_t strand)
+                                      PoreModelStateParams state)
 {
-    // event level mean, scaled with the drift value
-    float level = get_drift_scaled_level(events, scalings, event_idx, strand);
-    GaussianParameters gp = get_scaled_gaussian_from_pore_model_state(scalings, states, strand, kmer_rank);
-    float lp = log_normal_pdf(level, gp);
+    float log_inv_sqrt_2pi = log(0.3989422804014327);
+    float level_tmp =event.mean;
+    float time = event.start_time - event_0.start_time;
+    float level = level_tmp - time * scalings.drift;
+    float gp_mean = scalings.scale * state.level_mean + scalings.shift;
+    float gp_stdv = state.level_stdv * scalings.var;
+    float gp_log_stdv = state.level_log_stdv + scalings.log_var;
+    float a = (level - gp_mean) / gp_stdv;
+    float lp = log_inv_sqrt_2pi - gp_log_stdv + (-0.5f * a * a);
     return lp;
 }
 
@@ -244,24 +208,6 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(size_t k, std::vecto
             band_lower_left[band_idx] = move_down(band_lower_left[band_idx - 1]);
         }
 
-/*
-        float max_score = -INFINITY;
-        int tmp_max_offset = 0;
-        for(int tmp = 0; tmp < bandwidth; ++tmp) {
-            float s = bands[band_idx - 1][tmp];
-            if(s > max_score) {
-                max_score = s;
-                tmp_max_offset = tmp;
-            }
-        }
-        fprintf(stderr, "bi: %d ll: %.2f up: %.2f [%d %d] [%d %d] max: %.2f [%d %d] move: %s\n", 
-            band_idx, bands[band_idx - 1][0], bands[band_idx - 1][bandwidth - 1], 
-            band_lower_left[band_idx - 1].event_idx, band_lower_left[band_idx - 1].kmer_idx,
-            event_at_offset(band_idx - 1, bandwidth - 1), kmer_at_offset(band_idx - 1, bandwidth - 1),
-            max_score, event_at_offset(band_idx - 1, tmp_max_offset), kmer_at_offset(band_idx - 1, tmp_max_offset),
-            (right ? "RIGHT" : "DOWN"));
-*/
-
         // If the trim state is within the band, fill it in here
         int trim_offset = band_kmer_to_offset(band_idx, -1);
         if(is_offset_valid(trim_offset)) {
@@ -286,7 +232,6 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(size_t k, std::vecto
 
         int max_offset = std::min(kmer_max_offset, event_max_offset);
         max_offset = std::min(max_offset, bandwidth);
-
         for(int offset = min_offset; offset < max_offset; ++offset) {
             int event_idx = event_at_offset(band_idx, offset);
             int kmer_idx = kmer_at_offset(band_idx, offset);
@@ -309,8 +254,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(size_t k, std::vecto
             float up   = is_offset_valid(offset_up)   ? BAND_ARRAY(band_idx - 1,offset_up)   : -INFINITY;
             float left = is_offset_valid(offset_left) ? BAND_ARRAY(band_idx - 1,offset_left) : -INFINITY;
             float diag = is_offset_valid(offset_diag) ? BAND_ARRAY(band_idx - 2,offset_diag) : -INFINITY;
-
-            float lp_emission = log_probability_match_r9(events, scalings, states, kmer_rank, event_idx, strand_idx);
+            float lp_emission = log_probability_match_r9(events[event_idx], events[0], scalings, states[kmer_rank]);
             float score_d = diag + lp_step + lp_emission;
             float score_u = up + lp_stay + lp_emission;
             float score_l = left + lp_skip;
@@ -333,21 +277,6 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(size_t k, std::vecto
             fills += 1;
         }
     }
-
-    /*
-    // Debug, print some of the score matrix
-    for(int col = 0; col <= 10; ++col) {
-        for(int row = 0; row < 100; ++row) {
-            int kmer_idx = col - 1;
-            int event_idx = row - 1;
-            int band_idx = event_kmer_to_band(event_idx, kmer_idx);
-            int offset = band_kmer_to_offset(band_idx, kmer_idx);
-            assert(offset == band_event_to_offset(band_idx, event_idx));
-            assert(event_idx == event_at_offset(band_idx, offset));
-            fprintf(stdout, "ei: %d ki: %d bi: %d o: %d s: %.2f\n", event_idx, kmer_idx, band_idx, offset, bands[band_idx][offset]);
-        }
-    }
-    */
 
     //
     // Backtrack to compute alignment
@@ -380,7 +309,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(size_t k, std::vecto
     int curr_gap = 0;
     int max_gap = 0;
     while(curr_kmer_idx >= 0 && curr_event_idx >= 0) {
-
+        
         // emit alignment
         out.push_back({curr_kmer_idx, curr_event_idx});
 #ifdef DEBUG_ADAPTIVE
@@ -390,7 +319,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(size_t k, std::vecto
         // size_t kmer_rank = alphabet->kmer_rank(sequence.substr(curr_kmer_idx, k).c_str(), k);
         char* substring = &sequence[curr_kmer_idx];
         size_t kmer_rank = get_kmer_rank(substring, k);
-        sum_emission += log_probability_match_r9(events, scalings, states, kmer_rank, curr_event_idx, strand_idx);
+        sum_emission += log_probability_match_r9(events[curr_event_idx], events[0], scalings, states[kmer_rank]);
         n_aligned_events += 1;
 
         size_t band_idx = event_kmer_to_band(curr_event_idx, curr_kmer_idx);
@@ -459,7 +388,11 @@ int main() {
     }
 
     std::string sequence;
-    file1.read((char*)&sequence, sizeof(sequence));
+    uint32_t sequence_len;
+    file1.read((char*)&sequence_len, sizeof(sequence_len));
+    sequence.resize(sequence_len);
+    file1.read((char*)sequence.c_str(), sequence_len);
+    // file1 >> sequence;
 
     file1.close();
 
@@ -468,25 +401,26 @@ int main() {
     std::vector<SquiggleEvent>().swap(events);
     std::vector<PoreModelStateParams>().swap(states);
 
-    std::ifstream file2;
+    int flag = 1;
 
+    std::ifstream file2;
+    
     file2.open("align_result_nanopolish", std::fstream::binary);
-    std::vector<AlignedPair> event_alignments;
     AlignedPair event_alignment;
     uint32_t n_event_alignments;
     file2.read((char*)&n_event_alignments, sizeof(n_event_alignments));
     for (uint32_t i = 0; i <= n_event_alignments; i++) {
         file2.read((char*)&event_alignment, sizeof(event_alignment));
-        event_alignments.push_back(event_alignment);
+        if (!(event_alignment == event_alignment_new[i])) {
+            flag = 0; 
+            printf("%d original: %d %d new: %d %d\n", i, event_alignment.ref_pos, 
+                   event_alignment.read_pos, event_alignment_new[i].ref_pos, event_alignment_new[i].read_pos);
+        }
     }
-
     file2.close();
 
-    int flag = 1;
-    for (int i = 0; i <= n_event_alignments; i++) {
-        if (event_alignments[i] == event_alignment_new[i]) flag = 0;
-    }
     if (flag) std::cout << "Correct!" << std::endl;
+    else std::cout << "Wrong!" << std::endl;
 
     return 0;
 }

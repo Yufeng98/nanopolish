@@ -358,9 +358,6 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
     assert(et.event != NULL);
     free(et.event);
 
-    // SquiggleRead object;
-    std::cout << this->save_file << std::endl;
-
     if (this->save_file) {
 
         std::ofstream file1;
@@ -381,45 +378,12 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
             file1.write((char*)&this->base_model[strand_idx]->states[i], sizeof(this->base_model[strand_idx]->states[i]));
         }
 
-        file1.write((char*)&read_sequence, sizeof(read_sequence));
+        uint32_t sequence_len = read_sequence.length();
+        file1.write((char*)&sequence_len, sizeof(sequence_len));
+        file1.write(read_sequence.c_str(), sequence_len);
+        // file1 << read_sequence;
 
         file1.close();
-
-
-        // FILE *fp;
-        // fp = fopen("align_parameter_nanopolish", "w+");
-        // if(fp==NULL) {
-        //     printf("File cannot open! " ); 
-        //     exit(0);
-        // }
-
-        // uint32_t n_events = this->events[strand_idx].size();
-        // struct SquiggleEvent* events = (struct SquiggleEvent*)malloc(sizeof(struct SquiggleEvent) * n_events); 
-        // for (uint32_t i = 0; i <= n_events; i++) {
-        //     events[i] = {this->events[strand_idx][i].mean, this->events[strand_idx][i].stdv, this->events[strand_idx][i].start_time,
-        //                  this->events[strand_idx][i].duration, this->events[strand_idx][i].log_stdv};
-        // }
-
-        // uint32_t n_status = this->base_model[strand_idx]->states.size();
-        // struct PoreModelStateParams* states = (struct PoreModelStateParams*)malloc(sizeof(struct PoreModelStateParams) * n_events);
-        // for (uint32_t i = 0; i <= n_status; i++) {
-        //     states[i] = {this->base_model[strand_idx]->states[i].level_mean, this->base_model[strand_idx]->states[i].level_stdv,
-        //                  this->base_model[strand_idx]->states[i].sd_mean, this->base_model[strand_idx]->states[i].sd_stdv,
-        //                  this->base_model[strand_idx]->states[i].level_log_stdv, this->base_model[strand_idx]->states[i].sd_lambda,
-        //                  this->base_model[strand_idx]->states[i].sd_log_lambda};
-        // }
-
-        // fwrite(&k, sizeof(size_t), 1, fp);
-        // fwrite(&n_events, sizeof(uint32_t), 1, fp);
-        // fwrite(events, sizeof(SquiggleEvent), n_events, fp);
-        // fwrite(&this->scalings[strand_idx], sizeof(SquiggleScalings), 1, fp);
-        // fwrite(&n_status, sizeof(uint32_t), 1, fp);
-        // fwrite(states, sizeof(PoreModelStateParams), n_status, fp);
-
-        // fclose(fp);
-
-        // free(events);
-        // free(states);
 
     }
 
@@ -438,26 +402,6 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
         }
 
         file1.close();
-        
-    //     FILE *fp;
-    //     fp = fopen("align_result_nanopolish", "w+");
-    //     if(fp==NULL) {
-    //         printf("File cannot open! " ); 
-    //         exit(0);
-    //     }
-
-    //     uint32_t n_event_alignments = event_alignment.size() * 0.2;
-    //     struct AlignedPair* event_alignments = (struct AlignedPair*)malloc(sizeof(struct AlignedPair) * n_event_alignments);
-    //     for (uint32_t i = 0; i <= n_event_alignments; i++) {
-    //         event_alignments[i] = {event_alignment[i].ref_pos, event_alignment[i].read_pos};
-    //     }
-
-    //     fwrite(&n_event_alignments, sizeof(uint32_t), 1, fp);
-    //     fwrite(event_alignments, sizeof(PoreModelStateParams), n_event_alignments, fp);
-
-    //     fclose(fp);
-
-    //     free(event_alignments);
 
     }
 

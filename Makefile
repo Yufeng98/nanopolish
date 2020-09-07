@@ -9,7 +9,7 @@ SUBDIRS := src src/hmm src/thirdparty src/thirdparty/scrappie src/common src/ali
 
 #Basic flags every build needs
 LIBS = -lz      # libz is Zlib, a compression library which can do gzip, deflate, and a few other formats
-CXXFLAGS ?= -g -O3      # ?= means only if it's not set/
+CXXFLAGS ?= -g -O0      # ?= means only if it's not set/
 CXXFLAGS += -std=c++11 -fopenmp -fsigned-char -D_FILE_OFFSET_BITS=64 #D_FILE_OFFSET_BITS=64 makes nanopolish work in 32 bit systems
 CFLAGS ?= -O3 -std=c99 -fsigned-char -D_FILE_OFFSET_BITS=64
 LDFLAGS ?=
