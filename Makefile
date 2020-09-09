@@ -87,6 +87,13 @@ FAST5_INCLUDE = -I./fast5/include
 # Include the src subdirectories
 NP_INCLUDE = $(addprefix -I./, $(SUBDIRS))
 
+# Include the vtune lib
+VTUNE_HOME = /opt/intel/vtune_profiler_2020/
+VTUNE_INCLUDE = -I$(VTUNE_HOME)/include
+VTUNE_LIB = -littnotify -L$(VTUNE_HOME)/lib64
+CPPFLAGS += $(VTUNE_INCLUDE)
+LIBS += $(VTUNE_LIB)
+
 # Add include flags
 CPPFLAGS += $(H5_INCLUDE) $(HTS_INCLUDE) $(MINIMAP2_INCLUDE) $(FAST5_INCLUDE) $(NP_INCLUDE) $(EIGEN_INCLUDE)
 

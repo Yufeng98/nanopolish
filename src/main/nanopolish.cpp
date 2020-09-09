@@ -21,6 +21,7 @@
 #include "nanopolish_vcf2fasta.h"
 #include "nanopolish_polya_estimator.h"
 #include "nanopolish_train_poremodel_from_basecalls.h"
+#include <ittnotify.h>
 
 int print_usage(int argc, char **argv);
 int print_version(int argc, char **argv);
@@ -66,6 +67,7 @@ int print_version(int, char **)
 
 int main(int argc, char** argv)     // argc is the number of parameters, argv are parameters
 {
+    __itt_pause();
     // Turn off HDF's exception printing, which is generally unhelpful for users
     H5Eset_auto(0, NULL, NULL);
 

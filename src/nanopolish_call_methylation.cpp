@@ -47,6 +47,7 @@
 #include "minimap.h"
 #include "bseq.h"
 #include "mmpriv.h"
+#include <ittnotify.h>
 
 using namespace std::placeholders;
 
@@ -903,5 +904,6 @@ int call_methylation_main(int argc, char** argv)
     fai_destroy(fai);
 
     return EXIT_SUCCESS;
+
 }
 
