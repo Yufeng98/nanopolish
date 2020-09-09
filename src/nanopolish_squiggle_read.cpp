@@ -19,6 +19,7 @@
 #include "nanopolish_fast5_io.h"
 #include "nanopolish_fast5_loader.h"
 #include <stdio.h>
+#include <ittnotify.h>
 
 extern "C" {
 #include "event_detection.h"
@@ -387,8 +388,10 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
 
     }
 
+    __itt_resume();
     // align events to the basecalled read
     std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(*this, *this->base_model[strand_idx], read_sequence);
+    __itt_pause();
 
     if (this->save_file) {
 
