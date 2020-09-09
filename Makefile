@@ -22,7 +22,7 @@ EIGEN ?= install
 HTS ?= install
 MINIMAP2 ?= install
 
-HDF5_VERSION ?= 1.8.14
+HDF5_VERSION ?= 1.10.4
 EIGEN_VERSION ?= 3.3.7
 
 # Check operating system, OSX doesn't have -lrt
