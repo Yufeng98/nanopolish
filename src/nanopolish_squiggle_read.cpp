@@ -406,6 +406,9 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
 
         file1.close();
 
+        std::cout << "create intermediate files." << std::endl;
+        std::exit(0);
+
     }
 
     // transform alignment into the base-to-event map
