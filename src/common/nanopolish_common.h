@@ -21,6 +21,11 @@
 #define PACKAGE_VERSION "0.13.2"
 #define PACKAGE_BUGREPORT "https://github.com/jts/nanopolish/issues"
 
+#include "fixed.h"
+using namespace numeric;
+typedef Fixed<11, 21> fixed;
+typedef Fixed<20, 12> fixed_long;
+
 //
 // Enumerated types
 //
@@ -81,6 +86,9 @@ struct GaussianParameters
     float mean;
     float stdv;
     float log_stdv; // == log(stdv), pre-computed for efficiency
+    fixed f_mean;
+    fixed f_stdv;
+    fixed f_log_stdv;
 };
 
 //

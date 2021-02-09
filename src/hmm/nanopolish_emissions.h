@@ -13,6 +13,11 @@
 #include "nanopolish_common.h"
 #include "nanopolish_squiggle_read.h"
 
+#include "fixed.h"
+using namespace numeric;
+typedef Fixed<11, 21> fixed;
+typedef Fixed<20, 12> fixed_long;
+
 //#define DEBUG_HMM_EMISSION 1
 
 // From SO: http://stackoverflow.com/questions/10847007/using-the-gaussian-probability-density-function-in-c
@@ -64,6 +69,28 @@ inline float log_probability_match_r9(const SquiggleRead& read,
     float level = read.get_drift_scaled_level(event_idx, strand);
     GaussianParameters gp = read.get_scaled_gaussian_from_pore_model_state(pore_model, strand, kmer_rank);
     float lp = log_normal_pdf(level, gp);
+    return lp;
+}
+
+inline fixed f_log_normal_pdf(fixed x, const GaussianParameters& g) {
+    fixed gp_mean = g.f_mean;
+    fixed gp_stdv = g.f_stdv;
+    fixed gp_log_stdv = g.f_log_stdv;
+    fixed f_log_inv_sqrt_2pi = log(0.3989422804014327);
+    fixed a = (x - gp_mean) / gp_stdv;
+    return f_log_inv_sqrt_2pi - gp_log_stdv + (-0.5f * a * a);
+}
+
+inline fixed f_log_probability_match_r9(const SquiggleRead& read,
+                                      const PoreModel& pore_model,
+                                      uint32_t kmer_rank,
+                                      uint32_t event_idx,
+                                      uint8_t strand)
+{
+    // event level mean, scaled with the drift value
+    fixed level = read.f_get_drift_scaled_level(event_idx, strand);
+    GaussianParameters gp = read.get_scaled_gaussian_from_pore_model_state(pore_model, strand, kmer_rank);
+    fixed lp = f_log_normal_pdf(level, gp);
     return lp;
 }
 

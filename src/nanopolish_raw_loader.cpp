@@ -8,11 +8,14 @@
 //
 #include "nanopolish_raw_loader.h"
 #include "nanopolish_profile_hmm.h"
+#include "fixed.h"
 
 //#define DEBUG_BANDED 1
 //#define DEBUG_ADAPTIVE 1
 //#define DEBUG_PRINT_STATS 1
-
+using namespace numeric;
+typedef Fixed<11, 21> fixed;
+typedef Fixed<20, 12> fixed_long;
 //
 SquiggleScalings estimate_scalings_using_mom(const std::string& sequence,
                                              const PoreModel& pore_model,
@@ -149,18 +152,18 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
     std::vector<EventKmerPair> band_lower_left(n_bands);
  
     // initialize range of first two bands
-    band_lower_left[0].event_idx = half_bandwidth - 1;
-    band_lower_left[0].kmer_idx = -1 - half_bandwidth;
+    band_lower_left[0].event_idx = half_bandwidth - 1;  // 49
+    band_lower_left[0].kmer_idx = -1 - half_bandwidth;  // -51
     band_lower_left[1] = move_down(band_lower_left[0]);
 
     // band 0: score zero in the central cell
-    int start_cell_offset = band_kmer_to_offset(0, -1);
+    int start_cell_offset = band_kmer_to_offset(0, -1); // -1 - (-51) = 50
     assert(is_offset_valid(start_cell_offset));
-    assert(band_event_to_offset(0, -1) == start_cell_offset);
+    assert(band_event_to_offset(0, -1) == start_cell_offset);   // 49 - (-1) 50
     BAND_ARRAY(0,start_cell_offset) = 0.0f;
 
     // band 1: first event is trimmed
-    int first_trim_offset = band_event_to_offset(1, 0);
+    int first_trim_offset = band_event_to_offset(1, 0); // 50 - 0 = 50
     assert(kmer_at_offset(1, first_trim_offset) == -1);
     assert(is_offset_valid(first_trim_offset));
     BAND_ARRAY(1,first_trim_offset) = lp_trim;
@@ -214,7 +217,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
 
         // If the trim state is within the band, fill it in here
         int trim_offset = band_kmer_to_offset(band_idx, -1);
-        if(is_offset_valid(trim_offset)) {
+        if(is_offset_valid(trim_offset)) {  // for bands whose ll.kmer < -1, such band is trim state
             int event_idx = event_at_offset(band_idx, trim_offset);
             if(event_idx >= 0 && event_idx < n_events) {
                 BAND_ARRAY(band_idx,trim_offset) = lp_trim * (event_idx + 1);
@@ -256,14 +259,29 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
             assert(offset >= 0 && offset < bandwidth);
 #endif
 
-            float up   = is_offset_valid(offset_up)   ? BAND_ARRAY(band_idx - 1,offset_up)   : -INFINITY;
-            float left = is_offset_valid(offset_left) ? BAND_ARRAY(band_idx - 1,offset_left) : -INFINITY;
-            float diag = is_offset_valid(offset_diag) ? BAND_ARRAY(band_idx - 2,offset_diag) : -INFINITY;
+            // float up   = is_offset_valid(offset_up)   ? BAND_ARRAY(band_idx - 1,offset_up)   : -INFINITY;
+            // float left = is_offset_valid(offset_left) ? BAND_ARRAY(band_idx - 1,offset_left) : -INFINITY;
+            // float diag = is_offset_valid(offset_diag) ? BAND_ARRAY(band_idx - 2,offset_diag) : -INFINITY;
+            // float lp_emission = log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
+            // float score_d = diag + lp_step + lp_emission;
+            // float score_u = up + lp_stay + lp_emission;
+            // float score_l = left + lp_skip;
 
-            float lp_emission = log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
-            float score_d = diag + lp_step + lp_emission;
-            float score_u = up + lp_stay + lp_emission;
-            float score_l = left + lp_skip;
+            fixed_long f_lp_step = lp_step;
+            fixed_long f_lp_stay = lp_stay;
+            fixed_long f_lp_skip = lp_skip;
+            fixed_long f_up   = is_offset_valid(offset_up)   ? BAND_ARRAY(band_idx - 1,offset_up)   : -INFINITY;
+            fixed_long f_left = is_offset_valid(offset_left) ? BAND_ARRAY(band_idx - 1,offset_left) : -INFINITY;
+            fixed_long f_diag = is_offset_valid(offset_diag) ? BAND_ARRAY(band_idx - 2,offset_diag) : -INFINITY;
+            // fixed_long f_lp_emission = f_log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx).to_float();
+            fixed_long f_lp_emission = log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
+            float score_d, score_u, score_l;
+            if (f_diag == -INFINITY) score_d = -INFINITY;
+            else score_d = (f_diag + f_lp_step + f_lp_emission).to_float();
+            if (f_up == -INFINITY) score_d = -INFINITY;
+            else score_u = (f_up + f_lp_stay + f_lp_emission).to_float();
+            if (f_left == -INFINITY) score_d = -INFINITY;
+            else score_l = (f_left + f_lp_skip).to_float();
 
             float max_score = score_d;
             uint8_t from = FROM_D;
@@ -344,7 +362,6 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
         size_t offset = band_event_to_offset(band_idx, curr_event_idx);
         assert(band_kmer_to_offset(band_idx, curr_kmer_idx) == offset);
 
-        uint8_t from1 = TRACE_ARRAY(band_idx,offset);
         uint8_t from = TRACE_ARRAY(band_idx,offset);
         if(from == FROM_D) {
             curr_kmer_idx -= 1;
@@ -368,6 +385,10 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
     bool failed = false;
     if(avg_log_emission < min_average_log_emission || !spanned || max_gap > max_gap_threshold) {
         failed = true;
+        if (!spanned) fprintf(stderr, "Not Spanned! front: %d, back: %d", out.front().ref_pos, out.back().ref_pos - n_kmers + 1);
+        if (avg_log_emission < min_average_log_emission) fprintf(stderr, "avg_log_emission: %f ", avg_log_emission);
+        if (max_gap > max_gap_threshold) fprintf(stderr, "max_gap: %d ", max_gap);
+        fprintf(stderr, "\n");
         out.clear();
     }
 

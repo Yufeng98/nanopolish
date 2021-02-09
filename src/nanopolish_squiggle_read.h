@@ -19,6 +19,11 @@
 #include "nanopolish_fast5_loader.h"
 #include <string>
 
+#include "fixed.h"
+using namespace numeric;
+typedef Fixed<11, 21> fixed;
+typedef Fixed<20, 12> fixed_long;
+
 enum PoreType
 {
     PT_UNKNOWN = 0,
@@ -153,6 +158,14 @@ class SquiggleRead
             return level - time * this->scalings[strand].drift;
         }
 
+        inline fixed f_get_drift_scaled_level(uint32_t event_idx, uint32_t strand) const
+        {
+            fixed level = f_get_unscaled_level(event_idx, strand);
+            fixed time = f_get_time(event_idx, strand);
+            fixed drift = this->scalings[strand].drift;
+            return level - time * drift;
+        }
+
         // Return the observed current level after correcting for drift, shift and scale
         inline float get_fully_scaled_level(uint32_t event_idx, uint32_t strand) const
         {
@@ -170,10 +183,23 @@ class SquiggleRead
             return events[strand][event_idx].start_time - events[strand][0].start_time;
         }
 
+        inline fixed f_get_time(uint32_t event_idx, uint32_t strand) const
+        {
+            fixed now = events[strand][event_idx].start_time;
+            fixed start = events[strand][0].start_time;
+            return now - start;
+        }
+
         // Return the observed current level after correcting for drift
         inline float get_unscaled_level(uint32_t event_idx, uint32_t strand) const
         {
             return events[strand][event_idx].mean;
+        }
+
+        inline fixed f_get_unscaled_level(uint32_t event_idx, uint32_t strand) const
+        {
+            fixed mean = events[strand][event_idx].mean;
+            return mean;
         }
 
         // Return k-mer sized used by the pore model for this read strand
@@ -222,6 +248,24 @@ class SquiggleRead
             gp.mean = scalings.scale * params.level_mean + scalings.shift;
             gp.stdv = params.level_stdv * scalings.var;
             gp.log_stdv = params.level_log_stdv + scalings.log_var;
+            return gp;
+        }
+
+        inline GaussianParameters f_get_scaled_gaussian_from_pore_model_state(const PoreModel& pore_model, size_t strand_idx, size_t rank) const
+        {
+            const SquiggleScalings& scalings = this->scalings[strand_idx];
+            const PoreModelStateParams& params = pore_model.states[rank];
+            GaussianParameters gp;
+            fixed f_scale = scalings.scale;
+            fixed f_shift = scalings.shift;
+            fixed f_var = scalings.var;
+            fixed f_log_var = scalings.log_var;
+            fixed f_level_mean = params.level_mean;
+            fixed f_level_stdv = params.level_stdv;
+            fixed f_level_log_stdv = params.level_log_stdv;
+            gp.f_mean = f_scale * f_level_mean + f_shift;
+            gp.f_stdv = f_level_stdv * f_var;
+            gp.f_log_stdv = f_level_log_stdv + f_log_var;
             return gp;
         }
 
