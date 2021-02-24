@@ -20,8 +20,17 @@
 #include <string>
 
 #include "fixed.h"
+#include "FixPointCS/Cpp/Fixed64.h"
+#include "FloatX/src/floatx.hpp"
+#include "flexfloat.hpp"
+typedef flexfloat<6, 9> floatc;
+
+using namespace flx;
+// typedef floatx<6, 9> floatc;
+
+using namespace Fixed64;
 using namespace numeric;
-typedef Fixed<11, 21> fixed;
+typedef Fixed<18, 14> fixed;
 typedef Fixed<20, 12> fixed_long;
 
 enum PoreType
@@ -158,12 +167,28 @@ class SquiggleRead
             return level - time * this->scalings[strand].drift;
         }
 
-        inline fixed f_get_drift_scaled_level(uint32_t event_idx, uint32_t strand) const
+        inline fixed f_32_get_drift_scaled_level(uint32_t event_idx, uint32_t strand) const
         {
-            fixed level = f_get_unscaled_level(event_idx, strand);
-            fixed time = f_get_time(event_idx, strand);
+            fixed level = f_32_get_unscaled_level(event_idx, strand);
+            fixed time = f_32_get_time(event_idx, strand);
             fixed drift = this->scalings[strand].drift;
             return level - time * drift;
+        }
+
+        inline floatc fp_get_drift_scaled_level(uint32_t event_idx, uint32_t strand) const
+        {
+            floatc level = fp_get_unscaled_level(event_idx, strand);
+            floatc time = fp_get_time(event_idx, strand);
+            floatc drift = this->scalings[strand].drift;
+            return level - time * drift;
+        }
+
+        inline FP_LONG f_get_drift_scaled_level(uint32_t event_idx, uint32_t strand) const
+        {
+            FP_LONG level = f_get_unscaled_level(event_idx, strand);
+            FP_LONG time = f_get_time(event_idx, strand);
+            FP_LONG drift = FromFloat(this->scalings[strand].drift);
+            return Sub(level, Mul(time, drift));
         }
 
         // Return the observed current level after correcting for drift, shift and scale
@@ -183,11 +208,25 @@ class SquiggleRead
             return events[strand][event_idx].start_time - events[strand][0].start_time;
         }
 
-        inline fixed f_get_time(uint32_t event_idx, uint32_t strand) const
+        inline fixed f_32_get_time(uint32_t event_idx, uint32_t strand) const
         {
             fixed now = events[strand][event_idx].start_time;
             fixed start = events[strand][0].start_time;
             return now - start;
+        }
+
+        inline floatc fp_get_time(uint32_t event_idx, uint32_t strand) const
+        {
+            floatc now = events[strand][event_idx].start_time;
+            floatc start = events[strand][0].start_time;
+            return now - start;
+        }
+
+        inline FP_LONG f_get_time(uint32_t event_idx, uint32_t strand) const
+        {
+            FP_LONG now = FromFloat(events[strand][event_idx].start_time);
+            FP_LONG start = FromFloat(events[strand][0].start_time);
+            return Sub(now, start);
         }
 
         // Return the observed current level after correcting for drift
@@ -196,9 +235,21 @@ class SquiggleRead
             return events[strand][event_idx].mean;
         }
 
-        inline fixed f_get_unscaled_level(uint32_t event_idx, uint32_t strand) const
+        inline fixed f_32_get_unscaled_level(uint32_t event_idx, uint32_t strand) const
         {
             fixed mean = events[strand][event_idx].mean;
+            return mean;
+        }
+
+        inline floatc fp_get_unscaled_level(uint32_t event_idx, uint32_t strand) const
+        {
+            floatc mean = events[strand][event_idx].mean;
+            return mean;
+        }
+
+        inline FP_LONG f_get_unscaled_level(uint32_t event_idx, uint32_t strand) const
+        {
+            FP_LONG mean = FromFloat(events[strand][event_idx].mean);
             return mean;
         }
 
@@ -251,7 +302,25 @@ class SquiggleRead
             return gp;
         }
 
-        inline GaussianParameters f_get_scaled_gaussian_from_pore_model_state(const PoreModel& pore_model, size_t strand_idx, size_t rank) const
+        inline GaussianParameters fp_get_scaled_gaussian_from_pore_model_state(const PoreModel& pore_model, size_t strand_idx, size_t rank) const
+        {
+            const SquiggleScalings& scalings = this->scalings[strand_idx];
+            const PoreModelStateParams& params = pore_model.states[rank];
+            GaussianParameters gp;
+            floatc f_scale = scalings.scale;
+            floatc f_shift = scalings.shift;
+            floatc f_var = scalings.var;
+            floatc f_log_var = scalings.log_var;
+            floatc f_level_mean = params.level_mean;
+            floatc f_level_stdv = params.level_stdv;
+            floatc f_level_log_stdv = params.level_log_stdv;
+            gp.fp_mean = f_scale * f_level_mean + f_shift;
+            gp.fp_stdv = f_level_stdv * f_var;
+            gp.fp_log_stdv = f_level_log_stdv + f_log_var;
+            return gp;
+        }
+
+        inline GaussianParameters f_32_get_scaled_gaussian_from_pore_model_state(const PoreModel& pore_model, size_t strand_idx, size_t rank) const
         {
             const SquiggleScalings& scalings = this->scalings[strand_idx];
             const PoreModelStateParams& params = pore_model.states[rank];
@@ -263,9 +332,28 @@ class SquiggleRead
             fixed f_level_mean = params.level_mean;
             fixed f_level_stdv = params.level_stdv;
             fixed f_level_log_stdv = params.level_log_stdv;
-            gp.f_mean = f_scale * f_level_mean + f_shift;
-            gp.f_stdv = f_level_stdv * f_var;
-            gp.f_log_stdv = f_level_log_stdv + f_log_var;
+            gp.f_32_mean = f_scale * f_level_mean + f_shift;
+            gp.f_32_stdv = f_level_stdv * f_var;
+            gp.f_32_log_stdv = f_level_log_stdv + f_log_var;
+            return gp;
+        }
+
+        inline GaussianParameters f_get_scaled_gaussian_from_pore_model_state(const PoreModel& pore_model, size_t strand_idx, size_t rank) const
+        {
+            const SquiggleScalings& scalings = this->scalings[strand_idx];
+            const PoreModelStateParams& params = pore_model.states[rank];
+            GaussianParameters gp;
+            FP_LONG f_scale = FromFloat(scalings.scale);
+            FP_LONG f_shift = FromFloat(scalings.shift);
+            FP_LONG f_var = FromFloat(scalings.var);
+            FP_LONG f_log_var = FromFloat(scalings.log_var);
+            FP_LONG f_level_mean = FromFloat(params.level_mean);
+            FP_LONG f_level_stdv = FromFloat(params.level_stdv);
+            FP_LONG f_level_log_stdv = FromFloat(params.level_log_stdv);
+            gp.f_mean = Add(Mul(f_scale, f_level_mean), f_shift);
+            gp.f_stdv = Mul(f_level_stdv, f_var);
+            gp.f_log_stdv = Add(f_level_log_stdv, f_log_var);
+            // fprintf(stderr, "gp.f_log_stdv %f gp.f_stdv %f\n", ToFloat(gp.f_log_stdv), ToFloat(gp.f_stdv));
             return gp;
         }
 

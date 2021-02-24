@@ -8,14 +8,30 @@
 //
 #include "nanopolish_raw_loader.h"
 #include "nanopolish_profile_hmm.h"
+
+// https://github.com/oprecomp/flexfloat
+// https://github.com/XMunkki/FixPointCS
+// https://github.com/oprecomp/FloatX
+// https://github.com/eteran/cpp-utilities/blob/master/fixed/include/eteran/cpp-utilities/Fixed.h
+
 #include "fixed.h"
+#include "FixPointCS/Cpp/Fixed64.h"
+#include "FloatX/src/floatx.hpp"
+#include "flexfloat.hpp"
+typedef flexfloat<6, 9> floatc;
+
+using namespace flx;
+// typedef floatx<6, 9> floatc;
+
+using namespace Fixed64;
 
 //#define DEBUG_BANDED 1
 //#define DEBUG_ADAPTIVE 1
 //#define DEBUG_PRINT_STATS 1
 using namespace numeric;
-typedef Fixed<11, 21> fixed;
+typedef Fixed<18, 14> fixed;
 typedef Fixed<20, 12> fixed_long;
+
 //
 SquiggleScalings estimate_scalings_using_mom(const std::string& sequence,
                                              const PoreModel& pore_model,
@@ -109,6 +125,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
     double lp_stay = log(p_stay);
     double lp_step = log(1.0 - exp(lp_skip) - exp(lp_stay));
     double lp_trim = log(0.01);
+    float lp_emission_min = 0;
  
     // dp matrix
     size_t n_rows = n_events + 1;
@@ -259,29 +276,77 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
             assert(offset >= 0 && offset < bandwidth);
 #endif
 
+            float up   = is_offset_valid(offset_up)   ? BAND_ARRAY(band_idx - 1,offset_up)   : -INFINITY;
+            float left = is_offset_valid(offset_left) ? BAND_ARRAY(band_idx - 1,offset_left) : -INFINITY;
+            float diag = is_offset_valid(offset_diag) ? BAND_ARRAY(band_idx - 2,offset_diag) : -INFINITY;
+            float lp_emission = f_32_log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx).to_float();
+            // float lp_emission = log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
+            // float lp_emission = ToFloat(f_log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx));
+            // float lp_emission = float(fp_log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx));
+            float score_d = diag + lp_step + lp_emission;
+            float score_u = up + lp_stay + lp_emission;
+            float score_l = left + lp_skip;
+
+            // if (lp_emission < lp_emission_min) lp_emission_min = lp_emission;
+
+            // fixed_long f_lp_step = lp_step;
+            // fixed_long f_lp_stay = lp_stay;
+            // fixed_long f_lp_skip = lp_skip;
+            // fixed_long f_up   = is_offset_valid(offset_up)   ? BAND_ARRAY(band_idx - 1,offset_up)   : -INFINITY;
+            // fixed_long f_left = is_offset_valid(offset_left) ? BAND_ARRAY(band_idx - 1,offset_left) : -INFINITY;
+            // fixed_long f_diag = is_offset_valid(offset_diag) ? BAND_ARRAY(band_idx - 2,offset_diag) : -INFINITY;
+            // fixed_long f_lp_emission = f_log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx).to_float();
+            // // fixed_long f_lp_emission = log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
+            // float score_d, score_u, score_l;
+            // if (f_diag == -INFINITY) score_d = -INFINITY;
+            // else score_d = (f_diag + f_lp_step + f_lp_emission).to_float();
+            // if (f_up == -INFINITY) score_d = -INFINITY;
+            // else score_u = (f_up + f_lp_stay + f_lp_emission).to_float();
+            // if (f_left == -INFINITY) score_d = -INFINITY;
+            // else score_l = (f_left + f_lp_skip).to_float();
+
+            // floatc f_lp_step = lp_step;
+            // floatc f_lp_stay = lp_stay;
+            // floatc f_lp_skip = lp_skip;
+            // floatc f_up   = is_offset_valid(offset_up)   ? BAND_ARRAY(band_idx - 1,offset_up)   : -INFINITY;
+            // floatc f_left = is_offset_valid(offset_left) ? BAND_ARRAY(band_idx - 1,offset_left) : -INFINITY;
+            // floatc f_diag = is_offset_valid(offset_diag) ? BAND_ARRAY(band_idx - 2,offset_diag) : -INFINITY;
+            // // floatc f_lp_emission = fp_log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
+            // floatc f_lp_emission = log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
+            // float score_d, score_u, score_l;
+            // if (f_diag == -INFINITY) score_d = -INFINITY;
+            // else score_d = float(f_diag + f_lp_step + f_lp_emission);
+            // if (f_up == -INFINITY) score_d = -INFINITY;
+            // else score_u = float(f_up + f_lp_stay + f_lp_emission);
+            // if (f_left == -INFINITY) score_d = -INFINITY;
+            // else score_l = float(f_left + f_lp_skip);
+
+            // fprintf(stderr, "score_d: %.2f, diag: %.2f, lp_step: %.2f, lp_emission: %.2f\n", score_d, float(f_diag), float(f_lp_step), float(f_lp_emission));
+            // fprintf(stderr, "score_u: %.2f, up: %.2f, lp_stay: %.2f, lp_emission: %.2f\n", score_u, float(f_up), float(f_lp_stay), float(f_lp_emission));
+            // fprintf(stderr, "score_l: %.2f, left: %.2f, lp_skip: %.2f\n", score_l, float(f_left), float(f_lp_skip));
+
+            // fprintf(stderr, "score_d: %.2f, diag: %.2f, lp_step: %.2f, lp_emission: %.2f\n", score_d, diag, lp_step, lp_emission);
+            // fprintf(stderr, "score_u: %.2f, up: %.2f, lp_stay: %.2f, lp_emission: %.2f\n", score_u, up, lp_stay, lp_emission);
+            // fprintf(stderr, "score_l: %.2f, left: %.2f, lp_skip: %.2f\n", score_l, left, lp_skip);
+
             // float up   = is_offset_valid(offset_up)   ? BAND_ARRAY(band_idx - 1,offset_up)   : -INFINITY;
             // float left = is_offset_valid(offset_left) ? BAND_ARRAY(band_idx - 1,offset_left) : -INFINITY;
             // float diag = is_offset_valid(offset_diag) ? BAND_ARRAY(band_idx - 2,offset_diag) : -INFINITY;
-            // float lp_emission = log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
-            // float score_d = diag + lp_step + lp_emission;
-            // float score_u = up + lp_stay + lp_emission;
-            // float score_l = left + lp_skip;
-
-            fixed_long f_lp_step = lp_step;
-            fixed_long f_lp_stay = lp_stay;
-            fixed_long f_lp_skip = lp_skip;
-            fixed_long f_up   = is_offset_valid(offset_up)   ? BAND_ARRAY(band_idx - 1,offset_up)   : -INFINITY;
-            fixed_long f_left = is_offset_valid(offset_left) ? BAND_ARRAY(band_idx - 1,offset_left) : -INFINITY;
-            fixed_long f_diag = is_offset_valid(offset_diag) ? BAND_ARRAY(band_idx - 2,offset_diag) : -INFINITY;
-            // fixed_long f_lp_emission = f_log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx).to_float();
-            fixed_long f_lp_emission = log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
-            float score_d, score_u, score_l;
-            if (f_diag == -INFINITY) score_d = -INFINITY;
-            else score_d = (f_diag + f_lp_step + f_lp_emission).to_float();
-            if (f_up == -INFINITY) score_d = -INFINITY;
-            else score_u = (f_up + f_lp_stay + f_lp_emission).to_float();
-            if (f_left == -INFINITY) score_d = -INFINITY;
-            else score_l = (f_left + f_lp_skip).to_float();
+            // // FP_LONG f_lp_emission = f_log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
+            // FP_LONG f_lp_emission = FromFloat(log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx));
+            // FP_LONG f_lp_step = FromDouble(lp_step);
+            // FP_LONG f_lp_stay = FromDouble(lp_stay);
+            // FP_LONG f_lp_skip = FromDouble(lp_skip);
+            // FP_LONG f_up   = FromFloat(up);
+            // FP_LONG f_left = FromFloat(left);
+            // FP_LONG f_diag = FromFloat(diag);
+            // float score_d, score_u, score_l;
+            // if (diag == -INFINITY) score_d = -INFINITY;
+            // else score_d = ToFloat(Add(Add(f_diag, f_lp_step), f_lp_emission));
+            // if (up == -INFINITY) score_d = -INFINITY;
+            // else score_u = ToFloat(Add(Add(f_up, f_lp_stay), f_lp_emission));
+            // if (left == -INFINITY) score_d = -INFINITY;
+            // else score_l = ToFloat(Add(f_left, f_lp_skip));
 
             float max_score = score_d;
             uint8_t from = FROM_D;
@@ -325,6 +390,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
     std::vector<AlignedPair> out;
 
     float max_score = -INFINITY;
+    float min_score = 0;
     int curr_event_idx = 0;
     int curr_kmer_idx = n_kmers -1;
 
@@ -338,8 +404,10 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
                 max_score = s;
                 curr_event_idx = event_idx;
             }
+            if(s < min_score) min_score = s;
         }
     }
+    // fprintf(stderr, "%f %f\n", lp_emission_min, min_score);
 
 #ifdef DEBUG_ADAPTIVE
     fprintf(stderr, "[adaback] ei: %d ki: %d s: %.2f\n", curr_event_idx, curr_kmer_idx, max_score);
@@ -347,6 +415,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
 
     int curr_gap = 0;
     int max_gap = 0;
+    
     while(curr_kmer_idx >= 0 && curr_event_idx >= 0) {
         // emit alignment
         out.push_back({curr_kmer_idx, curr_event_idx});
@@ -385,12 +454,13 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
     bool failed = false;
     if(avg_log_emission < min_average_log_emission || !spanned || max_gap > max_gap_threshold) {
         failed = true;
-        if (!spanned) fprintf(stderr, "Not Spanned! front: %d, back: %d", out.front().ref_pos, out.back().ref_pos - n_kmers + 1);
-        if (avg_log_emission < min_average_log_emission) fprintf(stderr, "avg_log_emission: %f ", avg_log_emission);
-        if (max_gap > max_gap_threshold) fprintf(stderr, "max_gap: %d ", max_gap);
-        fprintf(stderr, "\n");
+        // if (!spanned) fprintf(stderr, "Not Spanned! front: %d back: %d ", out.front().ref_pos, out.back().ref_pos - n_kmers + 1);
+        // if (avg_log_emission < min_average_log_emission) fprintf(stderr, "avg_log_emission: %f ", avg_log_emission);
+        // if (max_gap > max_gap_threshold) fprintf(stderr, "max_gap: %d ", max_gap);
+        // fprintf(stderr, "\n");
         out.clear();
     }
+    // else fprintf(stderr, "Pass!\n");
 
     free(bands);
     free(trace);
