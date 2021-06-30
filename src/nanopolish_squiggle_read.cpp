@@ -393,9 +393,9 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
     // align events to the basecalled read
     // std::cerr << th << std::endl;
 
-    std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(*this, *this->base_model[strand_idx], read_sequence);
+    // std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(*this, *this->base_model[strand_idx], read_sequence);
 
-    // std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align_approximation(*this, *this->base_model[strand_idx], read_sequence, th);
+    std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align_approximation(*this, *this->base_model[strand_idx], read_sequence, th);
 
     // std::vector<AlignedPair> event_alignment_approximation = adaptive_banded_simple_event_align_approximation(*this, *this->base_model[strand_idx], read_sequence, th);
     __itt_pause();
