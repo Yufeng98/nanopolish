@@ -16,6 +16,7 @@ hdf5-*/
 include/
 lib/
 share/
+lib*.a
 
 hdf5-1.*.tar.gz
 eigen-3.*.tar.bz2
