@@ -87,6 +87,13 @@ FAST5_INCLUDE = -I./fast5/include
 # Include the src subdirectories
 NP_INCLUDE = $(addprefix -I./, $(SUBDIRS))
 
+# Include the flexfloat lib
+FLEXFLOAT_HOME = /home/yufenggu/punnet/long-reads/nanopolish/flexfloat
+FLEXFLOAT_INCLUDE = -I$(FLEXFLOAT_HOME)/include
+FLEXFLOAT_LIB = -lflexfloat -L$(FLEXFLOAT_HOME)/build
+CPPFLAGS += $(FLEXFLOAT_INCLUDE)
+LIBS += $(FLEXFLOAT_LIB)
+
 # Include the vtune lib
 VTUNE_HOME = /opt/intel/vtune_profiler_2020
 VTUNE_INCLUDE = -I$(VTUNE_HOME)/include

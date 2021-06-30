@@ -23,6 +23,10 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read,
                                                             const PoreModel& pore_model,
                                                             const std::string& sequence);
 
+std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(SquiggleRead& read,
+                                                            const PoreModel& pore_model,
+                                                            const std::string& sequence, float th);
+
 // Simple banded alignmend algorithm
 // Deprecated, use the above
 std::vector<AlignedPair> banded_simple_event_align(SquiggleRead& read,

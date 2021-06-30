@@ -21,6 +21,20 @@
 #define PACKAGE_VERSION "0.13.2"
 #define PACKAGE_BUGREPORT "https://github.com/jts/nanopolish/issues"
 
+#include "fixed.h"
+#include "FixPointCS/Cpp/Fixed64.h"
+#include "FloatX/src/floatx.hpp"
+#include "flexfloat.hpp"
+typedef flexfloat<6, 21> floatc;
+
+using namespace flx;
+// typedef floatx<6, 9> floatc;
+
+using namespace Fixed64;
+using namespace numeric;
+typedef Fixed<16, 16> fixed;
+typedef Fixed<20, 12> fixed_long;
+
 //
 // Enumerated types
 //
@@ -75,12 +89,21 @@ struct HMMAlignmentState
 // The parameters of a gaussian distribution
 struct GaussianParameters
 {
-    GaussianParameters() : mean(0.0f), stdv(1.0f), log_stdv(0.0) { }
+    GaussianParameters() : mean(0.0f), stdv(1.0f), log_stdv(0.0), f_mean(0), f_stdv(1), f_log_stdv(0), f_32_mean(0), f_32_stdv(1), f_32_log_stdv(0),fp_mean(0), fp_stdv(1), fp_log_stdv(0) { }
     GaussianParameters(float m, float s) : mean(m), stdv(s) { log_stdv = log(stdv); }
 
     float mean;
     float stdv;
     float log_stdv; // == log(stdv), pre-computed for efficiency
+    fixed f_32_mean;
+    fixed f_32_stdv;
+    fixed f_32_log_stdv;
+    FP_LONG f_mean;
+    FP_LONG f_stdv;
+    FP_LONG f_log_stdv;
+    floatc fp_mean;
+    floatc fp_stdv;
+    floatc fp_log_stdv;
 };
 
 //

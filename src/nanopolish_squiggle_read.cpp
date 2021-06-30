@@ -72,7 +72,7 @@ void SquiggleScalings::set6(double _shift,
 }
 
 //
-SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_file, const bool load_file, const uint32_t flags)
+SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_file, const bool load_file, float th, const uint32_t flags)
 {
     this->fast5_path = read_db.get_signal_path(name);
     g_total_reads += 1;
@@ -84,7 +84,7 @@ SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const
     std::string sequence = read_db.get_read_sequence(name);
     Fast5Data data = Fast5Loader::load_read(fast5_path, name);
     if(data.is_valid && !sequence.empty()) {
-        init(sequence, data, save_file, load_file, flags);
+        init(sequence, data, save_file, load_file, flags, th);
     } else {
         fprintf(stderr, "[warning] fast5 file is unreadable and will be skipped: %s\n", fast5_path.c_str());
         g_bad_fast5_file += 1;
@@ -97,18 +97,18 @@ SquiggleRead::SquiggleRead(const std::string& name, const ReadDB& read_db, const
     data.rt.raw = NULL;
 }
 
-SquiggleRead::SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags)
+SquiggleRead::SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags, float th)
 {
-    init(read_db.get_read_sequence(data.read_name), data, save_file, load_file, flags);
+    init(read_db.get_read_sequence(data.read_name), data, save_file, load_file, flags, th);
 }
 
-SquiggleRead::SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags)
+SquiggleRead::SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags, float th)
 {
-    init(sequence, data, save_file, load_file, flags);
+    init(sequence, data, save_file, load_file, flags, th);
 }
 
 //
-void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags)
+void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags, float th)
 {
     this->nucleotide_type = SRNT_DNA;
     this->pore_type = PT_UNKNOWN;
@@ -123,12 +123,13 @@ void SquiggleRead::init(const std::string& read_sequence, const Fast5Data& data,
 
     this->save_file = save_file;
     this->load_file = load_file;
+    this->th = th;
 
     // sometimes the basecaller will emit very short sequences, which causes problems
     // also there can be rare issues with the signal in the fast5 and we want to skip
     // such reads
     if(this->read_sequence.length() > 20 && data.is_valid && data.rt.n > 0) {
-        load_from_raw(data, flags);
+        load_from_raw(data, flags, this->th);
     } else {
         g_bad_fast5_file += 1;
     }
@@ -279,7 +280,7 @@ void SquiggleRead::load_from_events(const uint32_t flags)
 }
 
 //
-void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t flags)
+void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t flags, float th)
 {
 
     // Try to detect whether this read is DNA or RNA
@@ -390,8 +391,42 @@ void SquiggleRead::load_from_raw(const Fast5Data& fast5_data, const uint32_t fla
 
     __itt_resume();
     // align events to the basecalled read
-    std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(*this, *this->base_model[strand_idx], read_sequence);
+    // std::cerr << th << std::endl;
+    // std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align(*this, *this->base_model[strand_idx], read_sequence);
+    std::vector<AlignedPair> event_alignment = adaptive_banded_simple_event_align_approximation(*this, *this->base_model[strand_idx], read_sequence, th);
+    // std::vector<AlignedPair> event_alignment_approximation = adaptive_banded_simple_event_align_approximation(*this, *this->base_model[strand_idx], read_sequence, th);
     __itt_pause();
+
+    bool flag = true;
+    uint32_t n_event_alignments = event_alignment.size();
+    // uint32_t n_event_alignment_approximation = event_alignment_approximation.size();
+
+    // uint32_t last_wrong_line = 0;
+    // uint32_t n = std::min(n_event_alignments, n_event_alignment_approximation);
+    // for (uint32_t i = 1; i < n; i++) {
+    //     if (event_alignment[n_event_alignments - i] == event_alignment_approximation[n_event_alignment_approximation - i]) continue;
+    //     else {
+    //         if (flag) last_wrong_line = n_event_alignment_approximation - i;
+    //         flag = false;
+    //         break;
+    //     }
+    // }
+    // if (!flag) std::cerr << this->read_name << " " << "n_alignments " << n_event_alignments << " n_alignments_approximation " << n_event_alignment_approximation << " last_wrong_line " << last_wrong_line << std::endl;
+
+    // for (uint32_t i = 0; i < n_event_alignments; i++) {
+    //     if (event_alignment[i] == event_alignment_approximation[i]) continue;
+    //     else flag = false;
+    // }
+    // if (!flag) std::cerr << "error trace: " << this->read_name << std::endl;
+
+    // std::ofstream myfile;
+    // myfile.open ("trace_fix_32_32_30.txt", std::fstream::app);
+    // myfile << this->read_name << "\n";
+    // myfile << n_event_alignment_approximation << "\n";
+    // for (uint32_t i = 0; i < n_event_alignment_approximation; i++) {
+    //         myfile << event_alignment_approximation[i].ref_pos << " " << event_alignment_approximation[i].read_pos << "\n";
+    //     }
+    // myfile.close();
 
     if (this->save_file) {
 
