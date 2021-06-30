@@ -23,14 +23,14 @@
 #include "FixPointCS/Cpp/Fixed64.h"
 #include "FloatX/src/floatx.hpp"
 #include "flexfloat.hpp"
-typedef flexfloat<6, 9> floatc;
+typedef flexfloat<6, 21> floatc;
 
 using namespace flx;
 // typedef floatx<6, 9> floatc;
 
 using namespace Fixed64;
 using namespace numeric;
-typedef Fixed<18, 14> fixed;
+typedef Fixed<16, 16> fixed;
 typedef Fixed<20, 12> fixed_long;
 
 enum PoreType
@@ -126,15 +126,15 @@ class SquiggleRead
     public:
 
         SquiggleRead() {} // legacy TODO remove
-        SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_file = false, const bool load_file = false, const uint32_t flags = 0);
-        SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_file = false, const bool load_file = false, const uint32_t flags = 0);
-        SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_file = false, const bool load_file = false, const uint32_t flags = 0);
+        SquiggleRead(const std::string& name, const ReadDB& read_db, const bool save_file = false, const bool load_file = false, float th = 1e-5, const uint32_t flags = 0);
+        SquiggleRead(const ReadDB& read_db, const Fast5Data& data, const bool save_file = false, const bool load_file = false, const uint32_t flags = 0, float th = 1e-5);
+        SquiggleRead(const std::string& sequence, const Fast5Data& data, const bool save_file = false, const bool load_file = false, const uint32_t flags = 0, float th = 1e-5);
         ~SquiggleRead();
 
         //
         // I/O
         //
-        void init(const std::string& read_sequence, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags);
+        void init(const std::string& read_sequence, const Fast5Data& data, const bool save_file, const bool load_file, const uint32_t flags, float th = 1e-5);
 
         //
         // Access to data
@@ -398,6 +398,7 @@ class SquiggleRead
 
         // flag for profile
         bool save_file, load_file;
+        float th;
 
         // unique identifier of the read
         std::string read_name;
@@ -444,7 +445,7 @@ class SquiggleRead
         void load_from_events(const uint32_t flags);
 
         // Load all read data from raw samples
-        void load_from_raw(const Fast5Data& fast5_data, const uint32_t flags);
+        void load_from_raw(const Fast5Data& fast5_data, const uint32_t flags, float th);
 
         // Version-specific intialization functions
         void _load_R7(uint32_t si);

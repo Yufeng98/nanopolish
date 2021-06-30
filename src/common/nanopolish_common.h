@@ -25,14 +25,14 @@
 #include "FixPointCS/Cpp/Fixed64.h"
 #include "FloatX/src/floatx.hpp"
 #include "flexfloat.hpp"
-typedef flexfloat<6, 9> floatc;
+typedef flexfloat<6, 21> floatc;
 
 using namespace flx;
 // typedef floatx<6, 9> floatc;
 
 using namespace Fixed64;
 using namespace numeric;
-typedef Fixed<18, 14> fixed;
+typedef Fixed<16, 16> fixed;
 typedef Fixed<20, 12> fixed_long;
 
 //

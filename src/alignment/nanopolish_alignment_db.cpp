@@ -645,7 +645,7 @@ void AlignmentDB::_load_squiggle_read(const std::string& read_name)
     if(m_squiggle_read_map.find(read_name) == m_squiggle_read_map.end()) {
         
         // Allow the load to happen in parallel but lock access to adding it into the map
-        SquiggleRead* sr = new SquiggleRead(read_name, m_read_db, false, false);
+        SquiggleRead* sr = new SquiggleRead(read_name, m_read_db, false, false, 1e-5);
         
         #pragma omp critical
         m_squiggle_read_map[read_name] = sr;

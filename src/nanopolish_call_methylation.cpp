@@ -177,6 +177,7 @@ namespace opt
     static int watch_process_index = 0;
     static int progress = 0;
     static int num_threads = 1;
+    static float threshold = 1e-5;
     static int batch_size = 512;
     static int min_separation = 10;
     static int min_flank = 10;
@@ -185,7 +186,7 @@ namespace opt
     static bool load_file = false;
 }
 
-static const char* shortopts = "l:s:r:b:g:t:w:m:K:q:c:i:vn";
+static const char* shortopts = "l:s:r:b:g:t:h:w:m:K:q:c:i:vn";
 
 enum { OPT_HELP = 1, OPT_VERSION, OPT_PROGRESS, OPT_MIN_SEPARATION, OPT_WATCH_DIR, OPT_WATCH_WRITE_BAM };
 
@@ -197,6 +198,7 @@ static const struct option longopts[] = {
     { "methylation",          required_argument, NULL, 'q' },
     { "window",               required_argument, NULL, 'w' },
     { "threads",              required_argument, NULL, 't' },
+    { "threshold",            required_argument, NULL, 'h' },
     { "models-fofn",          required_argument, NULL, 'm' },
     { "watch-process-total",  required_argument, NULL, 'c' },
     { "watch-process-index",  required_argument, NULL, 'i' },
@@ -397,8 +399,8 @@ void calculate_methylation_for_read(const OutputHandles& handles,
             }
 
             fprintf(handles.site_writer, "%s\t%s\t%d\t%d\t", ss.chromosome.c_str(), read_orientation.c_str(), ss.start_position, ss.end_position);
-            fprintf(handles.site_writer, "%s\t%.2lf\t", sr.read_name.c_str(), diff);
-            fprintf(handles.site_writer, "%.2lf\t%.2lf\t", sum_ll_m, sum_ll_u);
+            fprintf(handles.site_writer, "%s\t%lf\t", sr.read_name.c_str(), diff);
+            fprintf(handles.site_writer, "%lf\t%lf\t", sum_ll_m, sum_ll_u);
             fprintf(handles.site_writer, "%d\t%d\t%s\n", ss.strands_scored, ss.n_motif, ss.sequence.c_str());
         }
     }
@@ -415,7 +417,7 @@ void calculate_methylation_for_read_from_bam(const OutputHandles& handles,
 {
     // Load a squiggle read for the mapped read
     std::string read_name = bam_get_qname(record);
-    SquiggleRead sr(read_name, read_db, opt::save_file, opt::load_file);
+    SquiggleRead sr(read_name, read_db, opt::save_file, opt::load_file, opt::threshold);
     calculate_methylation_for_read(handles, sr, fai, hdr, record, read_idx, region_start, region_end);
 }
 
@@ -798,6 +800,7 @@ void parse_call_methylation_options(int argc, char** argv)
             case 'b': arg >> opt::bam_file; break;
             case '?': die = true; break;
             case 't': arg >> opt::num_threads; break;
+            case 'h': arg >> opt::threshold; break;
             case 'm': arg >> opt::models_fofn; break;
             case 'w': arg >> opt::region; break;
             case 'v': opt::verbose++; break;
