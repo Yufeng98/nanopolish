@@ -88,14 +88,14 @@ for line in fp_lines:
     fp.append((sep[1] + sep[2] + sep[3] + sep[4], sep[5], sep[6], sep[7]))
 
 dic = {}
-for i in fixed:
-    if i[0] in dic.keys(): dic[i[0]] += [("fix", i[1], i[2], i[3])]
-    else: dic[i[0]] = [("fix", i[1], i[2], i[3])]
-    if (i%100000 == 0) print("fix", i)
+for i in range(len(fixed)):
+    if fixed[i][0] in dic.keys(): dic[fixed[i][0]] += [("fix", fixed[i][1], fixed[i][2], fixed[i][3])]
+    else: dic[fixed[i][0]] = [("fix", fixed[i][1], fixed[i][2], fixed[i][3])]
+    if (i%10000 == 0): print("fix", i)
 
-for i in fp:
-    if i[0] in dic.keys(): dic[i[0]] += [("fp", i[1], i[2], i[3])]
-    if (i%100000 == 0) print("fix", i)
+for i in range(len(fp)):
+    if fp[i][0] in dic.keys(): dic[fp[i][0]] += [("fp", fp[i][1], fp[i][2], fp[i][3])]
+    if (i%10000 == 0): print("fix", i)
 
 # print(len(name_fix), len(name_fp))
 # print(len(fixed_lst), len(fp_lst))

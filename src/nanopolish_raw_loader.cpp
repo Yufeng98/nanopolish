@@ -923,21 +923,21 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align(SquiggleRead& read, 
             float score_u = up + lp_stay + lp_emission;
             float score_l = left + lp_skip;
 
-            FP_LONG f_lp_emission = f_log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
-            FP_LONG f_lp_step = FromDouble(lp_step);
-            FP_LONG f_lp_stay = FromDouble(lp_stay);
-            FP_LONG f_lp_skip = FromDouble(lp_skip);
-            FP_LONG f_up   = FromFloat(up);
-            FP_LONG f_left = FromFloat(left);
-            FP_LONG f_diag = FromFloat(diag);
+            // FP_LONG f_lp_emission = f_log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
+            // FP_LONG f_lp_step = FromDouble(lp_step);
+            // FP_LONG f_lp_stay = FromDouble(lp_stay);
+            // FP_LONG f_lp_skip = FromDouble(lp_skip);
+            // FP_LONG f_up   = FromFloat(up);
+            // FP_LONG f_left = FromFloat(left);
+            // FP_LONG f_diag = FromFloat(diag);
 
-            float f_score_d, f_score_u, f_score_l;
-            if (diag == -INFINITY) f_score_d = -INFINITY; //printf("diag is infinite. %f\n", -INFINITY);
-            else f_score_d = ToFloat(Add(Add(f_diag, f_lp_step), f_lp_emission));
-            if (up == -INFINITY) f_score_u = -INFINITY; //printf("up is infinite. %f\n", -INFINITY);
-            else f_score_u = ToFloat(Add(Add(f_up, f_lp_stay), f_lp_emission));
-            if (left == -INFINITY) f_score_l = -INFINITY;
-            else f_score_l = ToFloat(Add(f_left, f_lp_skip));
+            // float f_score_d, f_score_u, f_score_l;
+            // if (diag == -INFINITY) f_score_d = -INFINITY; //printf("diag is infinite. %f\n", -INFINITY);
+            // else f_score_d = ToFloat(Add(Add(f_diag, f_lp_step), f_lp_emission));
+            // if (up == -INFINITY) f_score_u = -INFINITY; //printf("up is infinite. %f\n", -INFINITY);
+            // else f_score_u = ToFloat(Add(Add(f_up, f_lp_stay), f_lp_emission));
+            // if (left == -INFINITY) f_score_l = -INFINITY;
+            // else f_score_l = ToFloat(Add(f_left, f_lp_skip));
 
             // if (f_score_d == score_d && f_score_u == score_u && f_score_l == score_l) same++;
             // else {
