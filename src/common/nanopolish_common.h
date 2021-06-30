@@ -32,7 +32,7 @@ using namespace flx;
 
 using namespace Fixed64;
 using namespace numeric;
-typedef Fixed<12, 20> fixed;
+typedef Fixed<20, 12> fixed;
 typedef Fixed<20, 12> fixed_long;
 
 //

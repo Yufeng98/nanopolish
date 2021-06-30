@@ -88,12 +88,14 @@ for line in fp_lines:
     fp.append((sep[1] + sep[2] + sep[3] + sep[4], sep[5], sep[6], sep[7]))
 
 dic = {}
-for i in range(len(fixed)):
+# for i in range(len(fixed)):
+for i in range(20000):
     if fixed[i][0] in dic.keys(): dic[fixed[i][0]] += [("fix", fixed[i][1], fixed[i][2], fixed[i][3])]
     else: dic[fixed[i][0]] = [("fix", fixed[i][1], fixed[i][2], fixed[i][3])]
     if (i%10000 == 0): print("fix", i)
 
-for i in range(len(fp)):
+# for i in range(len(fp)):
+for i in range(20000):
     if fp[i][0] in dic.keys(): dic[fp[i][0]] += [("fp", fp[i][1], fp[i][2], fp[i][3])]
     if (i%10000 == 0): print("fp", i)
 
@@ -102,14 +104,16 @@ for i in range(len(fp)):
 
 diff_ratio = []
 diff_ratio_0 = 0
-diff_ratio_0000001 = 0
-diff_ratio_000001 = 0
-diff_ratio_00001 = 0
 diff_ratio_0001 = 0
+diff_ratio_0002 = 0
+diff_ratio_0004 = 0
 diff_ratio_001 = 0
+diff_ratio_002 = 0
+diff_ratio_004 = 0
 diff_ratio_01 = 0
+diff_ratio_02 = 0
+diff_ratio_04 = 0
 diff_ratio_1 = 0
-diff_ratio_10 = 0
 diff_else = 0
 
 for key in dic.keys():
@@ -118,30 +122,33 @@ for key in dic.keys():
             diff = abs(float(dic[key][0][1])-float(dic[key][1][1]))
             diff_ratio.append(diff)
             if diff == 0: diff_ratio_0 += 1
-            elif diff < 0.000001: diff_ratio_0000001 += 1
-            elif diff < 0.00001: diff_ratio_000001 += 1
-            elif diff < 0.0001: diff_ratio_00001 += 1
             elif diff < 0.001: diff_ratio_0001 += 1
+            elif diff < 0.002: diff_ratio_0002 += 1
+            elif diff < 0.004: diff_ratio_0004 += 1
             elif diff < 0.01: diff_ratio_001 += 1
+            elif diff < 0.02: diff_ratio_002 += 1
+            elif diff < 0.04: diff_ratio_004 += 1
             elif diff < 0.1: diff_ratio_01 += 1
+            elif diff < 0.2: diff_ratio_02 += 1
+            elif diff < 0.4: diff_ratio_04 += 1
             elif diff < 1: diff_ratio_1 += 1
-            elif diff < 10: 
-                diff_ratio_10 += 1
                 # print(float(dic[key][0][1]), float(dic[key][1][1]))
             else: diff_else += 1
 
-print("Ratio", len(diff_ratio), diff_ratio_0, diff_ratio_0000001, diff_ratio_000001, diff_ratio_00001, diff_ratio_0001, diff_ratio_001, diff_ratio_01, diff_ratio_1, diff_ratio_10, diff_else)
+print("Ratio", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
 
 diff_ratio = []
 diff_ratio_0 = 0
-diff_ratio_0000001 = 0
-diff_ratio_000001 = 0
-diff_ratio_00001 = 0
 diff_ratio_0001 = 0
+diff_ratio_0002 = 0
+diff_ratio_0004 = 0
 diff_ratio_001 = 0
+diff_ratio_002 = 0
+diff_ratio_004 = 0
 diff_ratio_01 = 0
+diff_ratio_02 = 0
+diff_ratio_04 = 0
 diff_ratio_1 = 0
-diff_ratio_10 = 0
 diff_else = 0
 
 for key in dic.keys():
@@ -150,30 +157,33 @@ for key in dic.keys():
             diff = abs(float(dic[key][0][2])-float(dic[key][1][2]))
             diff_ratio.append(diff)
             if diff == 0: diff_ratio_0 += 1
-            elif diff < 0.000001: diff_ratio_0000001 += 1
-            elif diff < 0.00001: diff_ratio_000001 += 1
-            elif diff < 0.0001: diff_ratio_00001 += 1
             elif diff < 0.001: diff_ratio_0001 += 1
+            elif diff < 0.002: diff_ratio_0002 += 1
+            elif diff < 0.004: diff_ratio_0004 += 1
             elif diff < 0.01: diff_ratio_001 += 1
+            elif diff < 0.02: diff_ratio_002 += 1
+            elif diff < 0.04: diff_ratio_004 += 1
             elif diff < 0.1: diff_ratio_01 += 1
+            elif diff < 0.2: diff_ratio_02 += 1
+            elif diff < 0.4: diff_ratio_04 += 1
             elif diff < 1: diff_ratio_1 += 1
-            elif diff < 10: 
-                diff_ratio_10 += 1
                 # print(float(dic[key][0][2]), float(dic[key][1][2]))
             else: diff_else += 1
 
-print("Methylated Score", len(diff_ratio), diff_ratio_0, diff_ratio_0000001, diff_ratio_000001, diff_ratio_00001, diff_ratio_0001, diff_ratio_001, diff_ratio_01, diff_ratio_1, diff_ratio_10, diff_else)
+print("Methylated Score", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
 
 diff_ratio = []
 diff_ratio_0 = 0
-diff_ratio_0000001 = 0
-diff_ratio_000001 = 0
-diff_ratio_00001 = 0
 diff_ratio_0001 = 0
+diff_ratio_0002 = 0
+diff_ratio_0004 = 0
 diff_ratio_001 = 0
+diff_ratio_002 = 0
+diff_ratio_004 = 0
 diff_ratio_01 = 0
+diff_ratio_02 = 0
+diff_ratio_04 = 0
 diff_ratio_1 = 0
-diff_ratio_10 = 0
 diff_else = 0
 
 for key in dic.keys():
@@ -182,19 +192,20 @@ for key in dic.keys():
             diff = abs(float(dic[key][0][3])-float(dic[key][1][3]))
             diff_ratio.append(diff)
             if diff == 0: diff_ratio_0 += 1
-            elif diff < 0.000001: diff_ratio_0000001 += 1
-            elif diff < 0.00001: diff_ratio_000001 += 1
-            elif diff < 0.0001: diff_ratio_00001 += 1
             elif diff < 0.001: diff_ratio_0001 += 1
+            elif diff < 0.002: diff_ratio_0002 += 1
+            elif diff < 0.004: diff_ratio_0004 += 1
             elif diff < 0.01: diff_ratio_001 += 1
+            elif diff < 0.02: diff_ratio_002 += 1
+            elif diff < 0.04: diff_ratio_004 += 1
             elif diff < 0.1: diff_ratio_01 += 1
+            elif diff < 0.2: diff_ratio_02 += 1
+            elif diff < 0.4: diff_ratio_04 += 1
             elif diff < 1: diff_ratio_1 += 1
-            elif diff < 10: 
-                diff_ratio_10 += 1
                 # print(float(dic[key][0][3]), float(dic[key][1][3]))
             else: diff_else += 1
 
-print("Unmethylated Score", len(diff_ratio), diff_ratio_0, diff_ratio_0000001, diff_ratio_000001, diff_ratio_00001, diff_ratio_0001, diff_ratio_001, diff_ratio_01, diff_ratio_1, diff_ratio_10, diff_else)
+print("Unmethylated Score", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
 
 
     # if ( abs(float(fixed_lst[i][3])-float(fp_lst[i][3]))<1 ): continue
