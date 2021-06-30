@@ -91,9 +91,11 @@ dic = {}
 for i in fixed:
     if i[0] in dic.keys(): dic[i[0]] += [("fix", i[1], i[2], i[3])]
     else: dic[i[0]] = [("fix", i[1], i[2], i[3])]
+    if (i%100000 == 0) print("fix", i)
 
 for i in fp:
     if i[0] in dic.keys(): dic[i[0]] += [("fp", i[1], i[2], i[3])]
+    if (i%100000 == 0) print("fix", i)
 
 # print(len(name_fix), len(name_fp))
 # print(len(fixed_lst), len(fp_lst))
