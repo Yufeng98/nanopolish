@@ -195,7 +195,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
 #endif
 
     // fill in remaining bands
-    for(int band_idx = 2; band_idx < int(th); ++band_idx) {
+    for(int band_idx = 2; band_idx < 30; ++band_idx) {
         // Determine placement of this band according to Suzuki's adaptive algorithm
         // When both ll and ur are out-of-band (ob) we alternate movements
         // otherwise we decide based on scores
@@ -306,7 +306,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
         }
     }
 
-    for(int band_idx = int(th); band_idx < n_bands; ++band_idx) {
+    for(int band_idx = 30; band_idx < n_bands; ++band_idx) {
         // Determine placement of this band according to Suzuki's adaptive algorithm
         // When both ll and ur are out-of-band (ob) we alternate movements
         // otherwise we decide based on scores
