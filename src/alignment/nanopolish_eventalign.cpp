@@ -555,7 +555,8 @@ void realign_read(const ReadDB& read_db,
     } else {
         sr_flag = 0;
     }
-    SquiggleRead sr(read_name, read_db, false, false, sr_flag, 1e-5);
+
+    SquiggleRead sr(read_name, read_db, false, false, 1e-5, sr_flag);
 
     if(opt::verbose > 1) {
         fprintf(stderr, "Realigning %s [%zu %zu]\n",
