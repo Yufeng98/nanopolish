@@ -31,7 +31,7 @@ using namespace Fixed64;
 //#define DEBUG_ADAPTIVE 1
 //#define DEBUG_PRINT_STATS 1
 using namespace numeric;
-typedef Fixed<14, 18> fixed;
+typedef Fixed<18, 14> fixed;
 typedef Fixed<20, 12> fixed_long;
 
 //
