@@ -19,5 +19,5 @@
 
 ~/nanopolish/nanopolish call-methylation  -t 1 -r /z/scratch7/yufenggu/methylation_example/output.fastq -b /z/scratch7/yufenggu/methylation_example/output.sorted.bam -g /z/scratch7/yufenggu/methylation_example/reference.fasta -s -w "chr20:5,000,000-10,000,000"
 
-~/nanopolish/nanopolish call-methylation  -t 1 -r /z/scratch7/yufenggu/methylation_example/output.fastq -b /z/scratch7/yufenggu/methylation_example/output.sorted.bam -g /z/scratch7/yufenggu/methylation_example/reference.fasta -s -w "chr20:0-64,444,167"
+~/nanopolish/nanopolish call-methylation  -t 48 -r /z/scratch7/yufenggu/methylation_example/output.fastq -b /z/scratch7/yufenggu/methylation_example/output.sorted.bam -g /z/scratch7/yufenggu/methylation_example/reference.fasta -w "chr20:0-64,444,167" > /z/scratch7/yufenggu/methylation_example/methylation_calls.tsv
 
