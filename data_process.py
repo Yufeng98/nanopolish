@@ -95,7 +95,7 @@ for i in range(len(fixed)):
 
 for i in range(len(fp)):
     if fp[i][0] in dic.keys(): dic[fp[i][0]] += [("fp", fp[i][1], fp[i][2], fp[i][3])]
-    if (i%10000 == 0): print("fix", i)
+    if (i%10000 == 0): print("fp", i)
 
 # print(len(name_fix), len(name_fp))
 # print(len(fixed_lst), len(fp_lst))
