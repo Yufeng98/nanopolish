@@ -88,14 +88,14 @@ def check_error_for_all_reads(data_type):
 
     dic = {}
     dic_read = {}
-    # for i in range(len(fixed)):
-    for i in range(10000):
+    for i in range(len(fixed)):
+    # for i in range(10000):
         if fixed[i][0] in dic.keys(): dic[fixed[i][0]] += [("fix", fixed[i][1])]
         else: dic[fixed[i][0]] = [("fix", fixed[i][1])]
         # if (i%10000 == 0): print("fix", i)
 
-    # for i in range(len(fp)):
-    for i in range(10000):
+    for i in range(len(fp)):
+    # for i in range(10000):
         if fp[i][0] in dic.keys(): dic[fp[i][0]] += [("fp", fp[i][1])]
         # if (i%10000 == 0): print("fp", i)
 
