@@ -75,7 +75,7 @@ def check_error_for_all_reads(data_type):
     fixed = []
     for line in fix_lines:
         sep = list(line.split())
-        fixed.append((sep[1] + sep[4], sep[5]))
+        fixed.append((sep[1] + sep[2] + sep[3] + sep[4], sep[5]))
 
     f = open("methylation_calls_fp_0_64.tsv", "r")
     # f = open("methylation_calls_fix_0_64_32_32.tsv", "r")
@@ -84,26 +84,25 @@ def check_error_for_all_reads(data_type):
     fp = []
     for line in fp_lines:
         sep = list(line.split())
-        fp.append((sep[1] + sep[4], sep[5]))
+        fp.append((sep[1] + sep[2] + sep[3] + sep[4], sep[5]))
 
     dic = {}
+    dic_read = {}
     # for i in range(len(fixed)):
-    for i in range(1000):
+    for i in range(10000):
         if fixed[i][0] in dic.keys(): dic[fixed[i][0]] += [("fix", fixed[i][1])]
         else: dic[fixed[i][0]] = [("fix", fixed[i][1])]
         if (i%10000 == 0): print("fix", i)
 
     # for i in range(len(fp)):
-    for i in range(1000):
+    for i in range(10000):
         if fp[i][0] in dic.keys(): dic[fp[i][0]] += [("fp", fp[i][1])]
         if (i%10000 == 0): print("fp", i)
-
-    print(dic)
 
     # print(len(name_fix), len(name_fp))
     # print(len(fixed_lst), len(fp_lst))
 
-    diff_ratio = []
+    diff_ratio = 0
     diff_ratio_0 = 0
     diff_ratio_0001 = 0
     diff_ratio_0002 = 0
@@ -118,24 +117,26 @@ def check_error_for_all_reads(data_type):
     diff_else = 0
 
     for key in dic.keys():
-        if len(dic[key]) == 2:
-            if (dic[key][0][0] == "fix" and dic[key][1][0] == "fp"):
-                diff = abs(float(dic[key][0][1])-float(dic[key][1][1]))
-                diff_ratio.append(diff)
-                if diff == 0: diff_ratio_0 += 1
-                elif diff < 0.001: diff_ratio_0001 += 1
-                elif diff < 0.002: diff_ratio_0002 += 1
-                elif diff < 0.004: diff_ratio_0004 += 1
-                elif diff < 0.01: diff_ratio_001 += 1
-                elif diff < 0.02: diff_ratio_002 += 1
-                elif diff < 0.04: diff_ratio_004 += 1
-                elif diff < 0.1: diff_ratio_01 += 1
-                elif diff < 0.2: diff_ratio_02 += 1
-                elif diff < 0.4: diff_ratio_04 += 1
-                elif diff < 1: diff_ratio_1 += 1
-                    # print(float(dic[key][0][1]), float(dic[key][1][1]))
-                else: diff_else += 1
+        if (len(dic[key]) == 2 and dic[key][0][0] == "fix" and dic[key][1][0] == "fp"):
+            diff = abs(float(dic[key][0][1])-float(dic[key][1][1]))
+            if key[-36:] in dic_read.keys(): dic_read[key[-36:]] += diff
+            else: dic_read[key[-36:]] = [diff]
+            diff_ratio += 1
+            if diff == 0: diff_ratio_0 += 1
+            elif diff < 0.001: diff_ratio_0001 += 1
+            elif diff < 0.002: diff_ratio_0002 += 1
+            elif diff < 0.004: diff_ratio_0004 += 1
+            elif diff < 0.01: diff_ratio_001 += 1
+            elif diff < 0.02: diff_ratio_002 += 1
+            elif diff < 0.04: diff_ratio_004 += 1
+            elif diff < 0.1: diff_ratio_01 += 1
+            elif diff < 0.2: diff_ratio_02 += 1
+            elif diff < 0.4: diff_ratio_04 += 1
+            elif diff < 1: diff_ratio_1 += 1
+                # print(float(dic[key][0][1]), float(dic[key][1][1]))
+            else: diff_else += 1
 
+    print(dic_read)
     print("Ratio", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
 
 
