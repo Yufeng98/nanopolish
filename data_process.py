@@ -92,12 +92,12 @@ def check_error_for_all_reads(data_type):
     for i in range(10000):
         if fixed[i][0] in dic.keys(): dic[fixed[i][0]] += [("fix", fixed[i][1])]
         else: dic[fixed[i][0]] = [("fix", fixed[i][1])]
-        if (i%10000 == 0): print("fix", i)
+        # if (i%10000 == 0): print("fix", i)
 
     # for i in range(len(fp)):
     for i in range(10000):
         if fp[i][0] in dic.keys(): dic[fp[i][0]] += [("fp", fp[i][1])]
-        if (i%10000 == 0): print("fp", i)
+        # if (i%10000 == 0): print("fp", i)
 
     # print(len(name_fix), len(name_fp))
     # print(len(fixed_lst), len(fp_lst))
@@ -139,7 +139,7 @@ def check_error_for_all_reads(data_type):
             else: diff_else += 1
 
     for key in dic_read.keys():
-        print(key, sum(dic_read[key]))
+        print("{} {}".format(key, sum(dic_read[key])/len(dic_read[key])))
     print("Ratio", diff_ratio, diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
 
 
