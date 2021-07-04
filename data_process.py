@@ -123,7 +123,7 @@ def check_error_for_all_reads(data_type):
             print(key[-36:])
             if key[-36:] in dic_read.keys(): dic_read[key[-36:]] += [diff]
             else: dic_read[key[-36:]] = [diff]
-            if key[-36:] in dic_read.keys(): dic_read[key[-36:]] += 1
+            if key[-36:] in dic_cnt.keys(): dic_cnt[key[-36:]] += 1
             else: dic_cnt[key[-36:]] = 0
             diff_ratio += 1
             if diff == 0: diff_ratio_0 += 1
