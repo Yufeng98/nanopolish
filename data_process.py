@@ -66,6 +66,38 @@ data_type = sys.argv[1]
 
 # print(len(f_read), len(fp_read)) 
 
+def match_similar_flag(data_type):
+
+    f = open("read_ratio_error_{}".format(data_type), "r")
+    fix_lines = f.readlines()
+    fix_lines = fix_lines[1:]
+    fixed = []
+    for line in fix_lines:
+        sep = list(line.split())
+        fixed.append((sep[0], sep[1]))
+
+    f = open("similar_flag_fix_{}.txt".format(data_type), "r")
+    fp_lines = f.readlines()
+    fp_lines = fp_lines[1:]
+    fp = []
+    for line in fp_lines:
+        sep = list(line.split())
+        fp.append((sep[0], sep[1], sep[2], sep[3]))
+
+    dic = {}
+    for i in range(len(fixed)):
+        if fixed[i][0] in dic.keys(): dic[fixed[i][0]] += [fixed[i][1]]
+        else: dic[fixed[i][0]] = [fixed[i][1]]
+
+    for i in range(len(fp)):
+        if fp[i][0] in dic.keys(): dic[fp[i][0]] += [fp[i][1], fp[i][2], fp[i][3]]
+        else: dic[fp[i][0]] = [fp[i][1], fp[i][2], fp[i][3]]
+
+    for key in dic.keys():
+        if (len(dic[key]) == 4):
+            print("{} {} {} {} {}".format(key, dic[key][0], dic[key][1], dic[key][2], dic[key][3]))
+
+
 def check_error_for_all_reads(data_type):
 
     f = open("methylation_calls_fix_0_64_{}.tsv".format(data_type), "r")
@@ -440,5 +472,6 @@ def check_error_for_all_read_parts(data_type):
 # print("threshold: 1e-{}".format(data_type), "error_trace: ", len(error_trace), "similar_trace: ", len(similar_trace), "not_detected: ", not_detected, "over_detected: ", over_detected)
 
 
-check_error_for_all_reads(data_type)
+# check_error_for_all_reads(data_type)
+match_similar_flag(data_type)
 

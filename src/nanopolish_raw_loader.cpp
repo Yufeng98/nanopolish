@@ -191,7 +191,6 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
     int fills = 0;
     bool similar_read = false;
     int similar_flag_equal = 0;
-    int similar_flag_00001 = 0;
     int similar_flag_001 = 0;
 #ifdef DEBUG_ADAPTIVE
     fprintf(stderr, "[trim] bi: %d o: %d e: %d k: %d s: %.2lf\n", 1, first_trim_offset, 0, -1, BAND_ARRAY(1,first_trim_offset));
@@ -512,9 +511,6 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
                 similar_read = true;
             }
 
-            if ( abs(score_d - score_u) < 0.00001 || abs(score_d == score_l) < 0.00001 || abs(score_l == score_u) < 0.00001 ) similar_flag_00001 += 1;
-            if ( abs(score_d - score_u) < 0.001 || abs(score_d == score_l) < 0.001 || abs(score_l == score_u) < 0.001 ) similar_flag_001 += 1;
-
             float max_score = score_d;
             uint8_t from = FROM_D;
 
@@ -679,7 +675,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
     //     }
 
     std::ofstream myfile;
-    myfile.open("similar_flag_fix_16_16.txt", std::fstream::app);
+    myfile.open("similar_flag_fix_16_16_30.txt", std::fstream::app);
     myfile << read.read_name << " " << similar_flag_equal << " " << similar_flag_00001 << " " << similar_flag_001 <<  "\n";
     myfile.close();
     
