@@ -88,6 +88,7 @@ def check_error_for_all_reads(data_type):
 
     dic = {}
     dic_read = {}
+    dic_cnt = {}
     # for i in range(len(fixed)):
     for i in range(10000):
         if fixed[i][0] in dic.keys(): dic[fixed[i][0]] += [("fix", fixed[i][1])]
@@ -123,7 +124,7 @@ def check_error_for_all_reads(data_type):
             if key[-36:] in dic_read.keys(): dic_read[key[-36:]] += [diff]
             else: dic_read[key[-36:]] = [diff]
             if key[-36:] in dic_read.keys(): dic_read[key[-36:]] += 1
-            else: dic_read[key[-36:]] = 0
+            else: dic_cnt[key[-36:]] = 0
             diff_ratio += 1
             if diff == 0: diff_ratio_0 += 1
             elif diff < 0.001: diff_ratio_0001 += 1
