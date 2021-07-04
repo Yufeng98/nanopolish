@@ -122,11 +122,10 @@ def check_error_for_all_reads(data_type):
             diff = abs(float(dic[key][0][1])-float(dic[key][1][1]))
             # print(key[-36:])
             if key[-36:] in dic_read.keys(): 
-                print(key[-36:], diff)
                 dic_read[key[-36:]] += [diff]
             else: 
-                print(key[-36:], diff)
                 dic_read[key[-36:]] = [diff]
+            print(dic_read[key[-36:]])
             if key[-36:] in dic_cnt.keys(): dic_cnt[key[-36:]] += 1
             else: dic_cnt[key[-36:]] = 1
             diff_ratio += 1
