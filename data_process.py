@@ -119,8 +119,8 @@ def check_error_for_all_reads(data_type):
     for key in dic.keys():
         if (len(dic[key]) == 2 and dic[key][0][0] == "fix" and dic[key][1][0] == "fp"):
             diff = abs(float(dic[key][0][1])-float(dic[key][1][1]))
-            print(key)
-            if key[-36:] in dic_read.keys(): dic_read[key[-36:]] += diff
+            print(key[-36:])
+            if key[-36:] in dic_read.keys(): dic_read[key[-36:]] += [diff]
             else: dic_read[key[-36:]] = [diff]
             diff_ratio += 1
             if diff == 0: diff_ratio_0 += 1
@@ -137,7 +137,8 @@ def check_error_for_all_reads(data_type):
                 # print(float(dic[key][0][1]), float(dic[key][1][1]))
             else: diff_else += 1
 
-    print(dic_read)
+    for key in dic_read.keys:
+        print(key, len(dic_read))
     print("Ratio", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
 
 
