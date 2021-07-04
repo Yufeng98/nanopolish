@@ -66,61 +66,64 @@ data_type = sys.argv[1]
 
 # print(len(f_read), len(fp_read)) 
 
+def check_error_for_all_reads(data_type):
 
+    f = open("methylation_calls_fix_0_64_{}.tsv".format(data_type), "r")
+    # f = open("methylation_calls.tsv", "r")
+    fix_lines = f.readlines()
+    fix_lines = fix_lines[1:]
+    fixed = []
+    for line in fix_lines:
+        sep = list(line.split())
+        fixed.append((sep[1] + sep[2] + sep[3] + sep[4], sep[5]))
 
+    f = open("methylation_calls_fp_0_64.tsv", "r")
+    # f = open("methylation_calls_fix_0_64_32_32.tsv", "r")
+    fp_lines = f.readlines()
+    fp_lines = fp_lines[1:]
+    fp = []
+    for line in fp_lines:
+        sep = list(line.split())
+        fp.append((sep[1] + sep[2] + sep[3] + sep[4], sep[5]))
 
-f = open("methylation_calls_fix_0_64_{}.tsv".format(data_type), "r")
-# f = open("methylation_calls.tsv", "r")
-fix_lines = f.readlines()
-fix_lines = fix_lines[1:]
-fixed = []
-for line in fix_lines:
-    sep = list(line.split())
-    fixed.append((sep[1] + sep[2] + sep[3] + sep[4], sep[5], sep[6], sep[7]))
+    dic = {}
+    dic_read = {}
+    # for i in range(len(fixed)):
+    for i in range(10000):
+        if fixed[i][0] in dic.keys(): dic[fixed[i][0]] += [("fix", fixed[i][1])]
+        else: dic[fixed[i][0]] = [("fix", fixed[i][1])]
+        # if (i%10000 == 0): print("fix", i)
 
-f = open("methylation_calls_fp_0_64.tsv", "r")
-# f = open("methylation_calls_fix_0_64_32_32.tsv", "r")
-fp_lines = f.readlines()
-fp_lines = fp_lines[1:]
-fp = []
-for line in fp_lines:
-    sep = list(line.split())
-    fp.append((sep[1] + sep[2] + sep[3] + sep[4], sep[5], sep[6], sep[7]))
+    # for i in range(len(fp)):
+    for i in range(10000):
+        if fp[i][0] in dic.keys(): dic[fp[i][0]] += [("fp", fp[i][1])]
+        # if (i%10000 == 0): print("fp", i)
 
-dic = {}
-for i in range(len(fixed)):
-# for i in range(20000):
-    if fixed[i][0] in dic.keys(): dic[fixed[i][0]] += [("fix", fixed[i][1], fixed[i][2], fixed[i][3])]
-    else: dic[fixed[i][0]] = [("fix", fixed[i][1], fixed[i][2], fixed[i][3])]
-    if (i%10000 == 0): print("fix", i)
+    # print(len(name_fix), len(name_fp))
+    # print(len(fixed_lst), len(fp_lst))
 
-for i in range(len(fp)):
-# for i in range(20000):
-    if fp[i][0] in dic.keys(): dic[fp[i][0]] += [("fp", fp[i][1], fp[i][2], fp[i][3])]
-    if (i%10000 == 0): print("fp", i)
+    diff_ratio = 0
+    diff_ratio_0 = 0
+    diff_ratio_0001 = 0
+    diff_ratio_0002 = 0
+    diff_ratio_0004 = 0
+    diff_ratio_001 = 0
+    diff_ratio_002 = 0
+    diff_ratio_004 = 0
+    diff_ratio_01 = 0
+    diff_ratio_02 = 0
+    diff_ratio_04 = 0
+    diff_ratio_1 = 0
+    diff_else = 0
 
-# print(len(name_fix), len(name_fp))
-# print(len(fixed_lst), len(fp_lst))
-
-diff_ratio = []
-diff_ratio_0 = 0
-diff_ratio_0001 = 0
-diff_ratio_0002 = 0
-diff_ratio_0004 = 0
-diff_ratio_001 = 0
-diff_ratio_002 = 0
-diff_ratio_004 = 0
-diff_ratio_01 = 0
-diff_ratio_02 = 0
-diff_ratio_04 = 0
-diff_ratio_1 = 0
-diff_else = 0
-
-for key in dic.keys():
-    if len(dic[key]) == 2:
-        if (dic[key][0][0] == "fix" and dic[key][1][0] == "fp"):
+    for key in dic.keys():
+        if (len(dic[key]) == 2 and dic[key][0][0] == "fix" and dic[key][1][0] == "fp"):
             diff = abs(float(dic[key][0][1])-float(dic[key][1][1]))
-            diff_ratio.append(diff)
+            if key[-36:] in dic_read.keys(): 
+                dic_read[key[-36:]] += [diff]
+            else: 
+                dic_read[key[-36:]] = [diff]
+            diff_ratio += 1
             if diff == 0: diff_ratio_0 += 1
             elif diff < 0.001: diff_ratio_0001 += 1
             elif diff < 0.002: diff_ratio_0002 += 1
@@ -135,77 +138,150 @@ for key in dic.keys():
                 # print(float(dic[key][0][1]), float(dic[key][1][1]))
             else: diff_else += 1
 
-print("Ratio", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
+    for key in dic_read.keys():
+        print("{} {}".format(key, sum(dic_read[key])/len(dic_read[key])))
+    print("Ratio", diff_ratio, diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
 
-diff_ratio = []
-diff_ratio_0 = 0
-diff_ratio_0001 = 0
-diff_ratio_0002 = 0
-diff_ratio_0004 = 0
-diff_ratio_001 = 0
-diff_ratio_002 = 0
-diff_ratio_004 = 0
-diff_ratio_01 = 0
-diff_ratio_02 = 0
-diff_ratio_04 = 0
-diff_ratio_1 = 0
-diff_else = 0
 
-for key in dic.keys():
-    if len(dic[key]) == 2:
-        if (dic[key][0][0] == "fix" and dic[key][1][0] == "fp"):
-            diff = abs(float(dic[key][0][2])-float(dic[key][1][2]))
-            diff_ratio.append(diff)
-            if diff == 0: diff_ratio_0 += 1
-            elif diff < 0.001: diff_ratio_0001 += 1
-            elif diff < 0.002: diff_ratio_0002 += 1
-            elif diff < 0.004: diff_ratio_0004 += 1
-            elif diff < 0.01: diff_ratio_001 += 1
-            elif diff < 0.02: diff_ratio_002 += 1
-            elif diff < 0.04: diff_ratio_004 += 1
-            elif diff < 0.1: diff_ratio_01 += 1
-            elif diff < 0.2: diff_ratio_02 += 1
-            elif diff < 0.4: diff_ratio_04 += 1
-            elif diff < 1: diff_ratio_1 += 1
-                # print(float(dic[key][0][2]), float(dic[key][1][2]))
-            else: diff_else += 1
+def check_error_for_all_read_parts(data_type):
 
-print("Methylated Score", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
+    f = open("methylation_calls_fix_0_64_{}.tsv".format(data_type), "r")
+    # f = open("methylation_calls.tsv", "r")
+    fix_lines = f.readlines()
+    fix_lines = fix_lines[1:]
+    fixed = []
+    for line in fix_lines:
+        sep = list(line.split())
+        fixed.append((sep[1] + sep[2] + sep[3] + sep[4], sep[5], sep[6], sep[7]))
 
-diff_ratio = []
-diff_ratio_0 = 0
-diff_ratio_0001 = 0
-diff_ratio_0002 = 0
-diff_ratio_0004 = 0
-diff_ratio_001 = 0
-diff_ratio_002 = 0
-diff_ratio_004 = 0
-diff_ratio_01 = 0
-diff_ratio_02 = 0
-diff_ratio_04 = 0
-diff_ratio_1 = 0
-diff_else = 0
+    f = open("methylation_calls_fp_0_64.tsv", "r")
+    # f = open("methylation_calls_fix_0_64_32_32.tsv", "r")
+    fp_lines = f.readlines()
+    fp_lines = fp_lines[1:]
+    fp = []
+    for line in fp_lines:
+        sep = list(line.split())
+        fp.append((sep[1] + sep[2] + sep[3] + sep[4], sep[5], sep[6], sep[7]))
 
-for key in dic.keys():
-    if len(dic[key]) == 2:
-        if (dic[key][0][0] == "fix" and dic[key][1][0] == "fp"):
-            diff = abs(float(dic[key][0][3])-float(dic[key][1][3]))
-            diff_ratio.append(diff)
-            if diff == 0: diff_ratio_0 += 1
-            elif diff < 0.001: diff_ratio_0001 += 1
-            elif diff < 0.002: diff_ratio_0002 += 1
-            elif diff < 0.004: diff_ratio_0004 += 1
-            elif diff < 0.01: diff_ratio_001 += 1
-            elif diff < 0.02: diff_ratio_002 += 1
-            elif diff < 0.04: diff_ratio_004 += 1
-            elif diff < 0.1: diff_ratio_01 += 1
-            elif diff < 0.2: diff_ratio_02 += 1
-            elif diff < 0.4: diff_ratio_04 += 1
-            elif diff < 1: diff_ratio_1 += 1
-                # print(float(dic[key][0][3]), float(dic[key][1][3]))
-            else: diff_else += 1
+    dic = {}
+    for i in range(len(fixed)):
+    # for i in range(20000):
+        if fixed[i][0] in dic.keys(): dic[fixed[i][0]] += [("fix", fixed[i][1], fixed[i][2], fixed[i][3])]
+        else: dic[fixed[i][0]] = [("fix", fixed[i][1], fixed[i][2], fixed[i][3])]
+        if (i%10000 == 0): print("fix", i)
 
-print("Unmethylated Score", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
+    for i in range(len(fp)):
+    # for i in range(20000):
+        if fp[i][0] in dic.keys(): dic[fp[i][0]] += [("fp", fp[i][1], fp[i][2], fp[i][3])]
+        if (i%10000 == 0): print("fp", i)
+
+    # print(len(name_fix), len(name_fp))
+    # print(len(fixed_lst), len(fp_lst))
+
+    diff_ratio = []
+    diff_ratio_0 = 0
+    diff_ratio_0001 = 0
+    diff_ratio_0002 = 0
+    diff_ratio_0004 = 0
+    diff_ratio_001 = 0
+    diff_ratio_002 = 0
+    diff_ratio_004 = 0
+    diff_ratio_01 = 0
+    diff_ratio_02 = 0
+    diff_ratio_04 = 0
+    diff_ratio_1 = 0
+    diff_else = 0
+
+    for key in dic.keys():
+        if len(dic[key]) == 2:
+            if (dic[key][0][0] == "fix" and dic[key][1][0] == "fp"):
+                diff = abs(float(dic[key][0][1])-float(dic[key][1][1]))
+                diff_ratio.append(diff)
+                if diff == 0: diff_ratio_0 += 1
+                elif diff < 0.001: diff_ratio_0001 += 1
+                elif diff < 0.002: diff_ratio_0002 += 1
+                elif diff < 0.004: diff_ratio_0004 += 1
+                elif diff < 0.01: diff_ratio_001 += 1
+                elif diff < 0.02: diff_ratio_002 += 1
+                elif diff < 0.04: diff_ratio_004 += 1
+                elif diff < 0.1: diff_ratio_01 += 1
+                elif diff < 0.2: diff_ratio_02 += 1
+                elif diff < 0.4: diff_ratio_04 += 1
+                elif diff < 1: diff_ratio_1 += 1
+                    # print(float(dic[key][0][1]), float(dic[key][1][1]))
+                else: diff_else += 1
+
+    print("Ratio", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
+
+    diff_ratio = []
+    diff_ratio_0 = 0
+    diff_ratio_0001 = 0
+    diff_ratio_0002 = 0
+    diff_ratio_0004 = 0
+    diff_ratio_001 = 0
+    diff_ratio_002 = 0
+    diff_ratio_004 = 0
+    diff_ratio_01 = 0
+    diff_ratio_02 = 0
+    diff_ratio_04 = 0
+    diff_ratio_1 = 0
+    diff_else = 0
+
+    for key in dic.keys():
+        if len(dic[key]) == 2:
+            if (dic[key][0][0] == "fix" and dic[key][1][0] == "fp"):
+                diff = abs(float(dic[key][0][2])-float(dic[key][1][2]))
+                diff_ratio.append(diff)
+                if diff == 0: diff_ratio_0 += 1
+                elif diff < 0.001: diff_ratio_0001 += 1
+                elif diff < 0.002: diff_ratio_0002 += 1
+                elif diff < 0.004: diff_ratio_0004 += 1
+                elif diff < 0.01: diff_ratio_001 += 1
+                elif diff < 0.02: diff_ratio_002 += 1
+                elif diff < 0.04: diff_ratio_004 += 1
+                elif diff < 0.1: diff_ratio_01 += 1
+                elif diff < 0.2: diff_ratio_02 += 1
+                elif diff < 0.4: diff_ratio_04 += 1
+                elif diff < 1: diff_ratio_1 += 1
+                    # print(float(dic[key][0][2]), float(dic[key][1][2]))
+                else: diff_else += 1
+
+    print("Methylated Score", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
+
+    diff_ratio = []
+    diff_ratio_0 = 0
+    diff_ratio_0001 = 0
+    diff_ratio_0002 = 0
+    diff_ratio_0004 = 0
+    diff_ratio_001 = 0
+    diff_ratio_002 = 0
+    diff_ratio_004 = 0
+    diff_ratio_01 = 0
+    diff_ratio_02 = 0
+    diff_ratio_04 = 0
+    diff_ratio_1 = 0
+    diff_else = 0
+
+    for key in dic.keys():
+        if len(dic[key]) == 2:
+            if (dic[key][0][0] == "fix" and dic[key][1][0] == "fp"):
+                diff = abs(float(dic[key][0][3])-float(dic[key][1][3]))
+                diff_ratio.append(diff)
+                if diff == 0: diff_ratio_0 += 1
+                elif diff < 0.001: diff_ratio_0001 += 1
+                elif diff < 0.002: diff_ratio_0002 += 1
+                elif diff < 0.004: diff_ratio_0004 += 1
+                elif diff < 0.01: diff_ratio_001 += 1
+                elif diff < 0.02: diff_ratio_002 += 1
+                elif diff < 0.04: diff_ratio_004 += 1
+                elif diff < 0.1: diff_ratio_01 += 1
+                elif diff < 0.2: diff_ratio_02 += 1
+                elif diff < 0.4: diff_ratio_04 += 1
+                elif diff < 1: diff_ratio_1 += 1
+                    # print(float(dic[key][0][3]), float(dic[key][1][3]))
+                else: diff_else += 1
+
+    print("Unmethylated Score", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
 
 
     # if ( abs(float(fixed_lst[i][3])-float(fp_lst[i][3]))<1 ): continue
@@ -362,4 +438,7 @@ print("Unmethylated Score", len(diff_ratio), diff_ratio_0, diff_ratio_0001, diff
 #         over_detected += 1
 # f.close()
 # print("threshold: 1e-{}".format(data_type), "error_trace: ", len(error_trace), "similar_trace: ", len(similar_trace), "not_detected: ", not_detected, "over_detected: ", over_detected)
+
+
+check_error_for_all_reads(data_type)
 

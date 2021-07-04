@@ -418,8 +418,6 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
             assert(offset >= 0 && offset < bandwidth);
 #endif
 
-            // 32-bits fixed approximation
-
             // float up   = is_offset_valid(offset_up)   ? BAND_ARRAY(band_idx - 1,offset_up)   : -INFINITY;
             // float left = is_offset_valid(offset_left) ? BAND_ARRAY(band_idx - 1,offset_left) : -INFINITY;
             // float diag = is_offset_valid(offset_diag) ? BAND_ARRAY(band_idx - 2,offset_diag) : -INFINITY;
