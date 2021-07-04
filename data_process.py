@@ -120,12 +120,12 @@ def check_error_for_all_reads(data_type):
     for key in dic.keys():
         if (len(dic[key]) == 2 and dic[key][0][0] == "fix" and dic[key][1][0] == "fp"):
             diff = abs(float(dic[key][0][1])-float(dic[key][1][1]))
-            print(key[-36:])
+            # print(key[-36:])
             if key[-36:] in dic_read.keys(): 
-                print(dic_read, diff)
+                print(key[-36:], diff)
                 dic_read[key[-36:]] += [diff]
             else: 
-                print(dic_read, diff)
+                print(key[-36:], diff)
                 dic_read[key[-36:]] = [diff]
             if key[-36:] in dic_cnt.keys(): dic_cnt[key[-36:]] += 1
             else: dic_cnt[key[-36:]] = 1
