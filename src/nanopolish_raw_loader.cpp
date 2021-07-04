@@ -676,7 +676,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
 
     std::ofstream myfile;
     myfile.open("similar_flag_fix_16_16_30.txt", std::fstream::app);
-    myfile << read.read_name << " " << similar_flag_equal << " " << similar_flag_00001 << " " << similar_flag_001 <<  "\n";
+    myfile << read.read_name << " " << similar_flag_equal << " " << similar_flag_001 <<  "\n";
     myfile.close();
     
     // QC results
