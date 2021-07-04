@@ -190,6 +190,9 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
 
     int fills = 0;
     bool similar_read = false;
+    int similar_flag_equal = 0;
+    int similar_flag_00001 = 0;
+    int similar_flag_001 = 0;
 #ifdef DEBUG_ADAPTIVE
     fprintf(stderr, "[trim] bi: %d o: %d e: %d k: %d s: %.2lf\n", 1, first_trim_offset, 0, -1, BAND_ARRAY(1,first_trim_offset));
 #endif
@@ -371,33 +374,33 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
         int max_offset = std::min(kmer_max_offset, event_max_offset);
         max_offset = std::min(max_offset, bandwidth);
 
-        std::string file_name;
-        std::string n;
-        std::string name[25] = {  "db0badd6-b0c9-4e7e-b6ca-bc0deb8741d8",
-                                    "d763e7f0-c28f-413d-aa80-345eeb054f62",
-                                    "f77701dc-077a-47e8-827c-772550a48464",
-                                    "cf1561b0-b570-41b6-bf54-c116a7fb3604",
-                                    "bf5f4c8d-e1fb-475a-87bc-0c9196e8e469",
-                                    "93c765dc-31df-4e52-89ae-55c00d636b70",
-                                    "b6244afc-d75f-443e-b156-b2c4d1a6ed1d",
-                                    "15335b85-1f8f-4b30-aac6-2291a032f9cb",
-                                    "3cfd1cea-f662-4ef2-b4c8-12cfdf25dbe8",
-                                    "5073afa1-3236-49bd-9ad7-5077f007e533",
-                                    "4d929162-76ea-4bdd-84ff-002bd38e85a7",
-                                    "371ea24d-1d18-4412-ac39-57988be2b08c",
-                                    "383cc4b4-84e0-4cea-a9d7-b806793f088f",
-                                    "84a2c397-6399-47be-9c8d-220ed27536d5",
-                                    "fd7e7616-edac-4cbb-841a-5a9bc3dc1f48",
-                                    "82cabb64-9154-4d3d-a94f-6b7d0877612f",
-                                    "488f4ebd-0331-456b-b8d1-3f1d6d96cc57",
-                                    "22b97cc8-37e6-4f0e-aa9d-2209843fee3b",
-                                    "5eea4c5f-02ab-48fb-837c-56f3ee954821",
-                                    "073a8fd8-144e-4e6a-8b7c-98a69b439311",
-                                    "565b72a0-ebae-422d-8092-46720fc18e84",
-                                    "79a90e09-2b7b-41b6-ac3e-6c2e949e0901",
-                                    "3b7d2fbe-09af-4696-989f-2acef48af72d",
-                                    "61bef566-da66-41ad-822b-7cbeec37e1c2",
-                                    "fd717478-1ba4-4f1b-b473-ff4733eec652" };
+        // std::string file_name;
+        // std::string n;
+        // std::string name[25] = {  "db0badd6-b0c9-4e7e-b6ca-bc0deb8741d8",
+        //                             "d763e7f0-c28f-413d-aa80-345eeb054f62",
+        //                             "f77701dc-077a-47e8-827c-772550a48464",
+        //                             "cf1561b0-b570-41b6-bf54-c116a7fb3604",
+        //                             "bf5f4c8d-e1fb-475a-87bc-0c9196e8e469",
+        //                             "93c765dc-31df-4e52-89ae-55c00d636b70",
+        //                             "b6244afc-d75f-443e-b156-b2c4d1a6ed1d",
+        //                             "15335b85-1f8f-4b30-aac6-2291a032f9cb",
+        //                             "3cfd1cea-f662-4ef2-b4c8-12cfdf25dbe8",
+        //                             "5073afa1-3236-49bd-9ad7-5077f007e533",
+        //                             "4d929162-76ea-4bdd-84ff-002bd38e85a7",
+        //                             "371ea24d-1d18-4412-ac39-57988be2b08c",
+        //                             "383cc4b4-84e0-4cea-a9d7-b806793f088f",
+        //                             "84a2c397-6399-47be-9c8d-220ed27536d5",
+        //                             "fd7e7616-edac-4cbb-841a-5a9bc3dc1f48",
+        //                             "82cabb64-9154-4d3d-a94f-6b7d0877612f",
+        //                             "488f4ebd-0331-456b-b8d1-3f1d6d96cc57",
+        //                             "22b97cc8-37e6-4f0e-aa9d-2209843fee3b",
+        //                             "5eea4c5f-02ab-48fb-837c-56f3ee954821",
+        //                             "073a8fd8-144e-4e6a-8b7c-98a69b439311",
+        //                             "565b72a0-ebae-422d-8092-46720fc18e84",
+        //                             "79a90e09-2b7b-41b6-ac3e-6c2e949e0901",
+        //                             "3b7d2fbe-09af-4696-989f-2acef48af72d",
+        //                             "61bef566-da66-41ad-822b-7cbeec37e1c2",
+        //                             "fd717478-1ba4-4f1b-b473-ff4733eec652" };
 
         for(int offset = min_offset; offset < max_offset; ++offset) {
             int event_idx = event_at_offset(band_idx, offset);
@@ -504,9 +507,13 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
                 // myfile.open ("read_with_similar_scores.txt");
                 // myfile << "similar read: " << read.read_name << std::endl;
                 // myfile.close();
+                similar_flag_equal += 1;
 
                 similar_read = true;
             }
+
+            if ( abs(score_d - score_u) < 0.00001 || abs(score_d == score_l) < 0.00001 || abs(score_l == score_u) < 0.00001 ) similar_flag_00001 += 1;
+            if ( abs(score_d - score_u) < 0.001 || abs(score_d == score_l) < 0.001 || abs(score_l == score_u) < 0.001 ) similar_flag_001 += 1;
 
             float max_score = score_d;
             uint8_t from = FROM_D;
@@ -670,6 +677,11 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
     // for (uint32_t i = 0; i < n_event_alignments; i++) {
     //         myfile << out[i].ref_pos << " " << out[i].read_pos << "\n";
     //     }
+
+    std::ofstream myfile;
+    myfile.open("similar_flag_fix_16_16.txt", std::fstream::app);
+    myfile << read.read_name << " " << similar_flag_equal << " " << similar_flag_00001 << " " << similar_flag_001 <<  "\n";
+    myfile.close();
     
     // QC results
     double avg_log_emission = sum_emission / n_aligned_events;
