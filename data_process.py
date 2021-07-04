@@ -140,8 +140,15 @@ def check_error_for_all_reads(data_type):
                 # print(float(dic[key][0][1]), float(dic[key][1][1]))
             else: diff_else += 1
 
+    read_cnt = 0
+    for key in dic_cnt.keys():
+        read_cnt += dic_cnt[key] 
+    print(read_cnt)
+    read_cnt = 0
     for key in dic_read.keys():
         print(key, len(dic_read))
+        read_cnt += len(dic_read)
+    print(read_cnt)
     print("Ratio", diff_ratio, diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
 
 
