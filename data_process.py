@@ -435,3 +435,6 @@ def check_error_for_all_read_parts(data_type):
 # f.close()
 # print("threshold: 1e-{}".format(data_type), "error_trace: ", len(error_trace), "similar_trace: ", len(similar_trace), "not_detected: ", not_detected, "over_detected: ", over_detected)
 
+
+check_error_for_all_reads(data_type)
+
