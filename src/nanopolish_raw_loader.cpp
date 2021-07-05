@@ -31,7 +31,7 @@ using namespace Fixed64;
 //#define DEBUG_ADAPTIVE 1
 //#define DEBUG_PRINT_STATS 1
 using namespace numeric;
-typedef Fixed<16, 16> fixed;
+typedef Fixed<17, 15> fixed;
 typedef Fixed<20, 12> fixed_long;
 
 //
@@ -687,7 +687,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
     //     }
 
     std::ofstream myfile;
-    myfile.open("flag_fix_16_16_30.txt", std::fstream::app);
+    myfile.open("flag_fix_17_15_30.txt", std::fstream::app);
     myfile << read.read_name << " " << similar_flag_equal << " " << similar_flag_001 << " " << a_flag_12 << " " << a_flag_10 << " " << a_flag_8 << " " << a_flag_6 << " " << n_bands << "\n";
     myfile.close();
     

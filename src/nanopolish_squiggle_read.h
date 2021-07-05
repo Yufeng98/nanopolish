@@ -30,7 +30,7 @@ using namespace flx;
 
 using namespace Fixed64;
 using namespace numeric;
-typedef Fixed<16, 16> fixed;
+typedef Fixed<17, 15> fixed;
 typedef Fixed<20, 12> fixed_long;
 
 enum PoreType
