@@ -192,10 +192,10 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
     bool similar_read = false;
     int similar_flag_equal = 0;
     int similar_flag_001 = 0;
-    int a_flag_2 = 0;
-    int a_flag_4 = 0;
     int a_flag_6 = 0;
     int a_flag_8 = 0;
+    int a_flag_10 = 0;
+    int a_flag_12 = 0;
 
 #ifdef DEBUG_ADAPTIVE
     fprintf(stderr, "[trim] bi: %d o: %d e: %d k: %d s: %.2lf\n", 1, first_trim_offset, 0, -1, BAND_ARRAY(1,first_trim_offset));
@@ -448,10 +448,10 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
             fixed f_diag = is_offset_valid(offset_diag) ? BAND_ARRAY(band_idx - 2,offset_diag) : -INFINITY;
             fixed f_lp_emission = f_32_log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
             float f_a = f_32_log_probability_match_r9_a(read, pore_model, kmer_rank, event_idx, strand_idx).to_float();
+            if (f_a > 12) a_flag_12 += 1;
+            if (f_a > 10) a_flag_10 += 1;
             if (f_a > 8) a_flag_8 += 1;
-            else if (f_a > 6) a_flag_6 += 1;
-            else if (f_a > 4) a_flag_4 += 1;
-            else if (f_a > 2) a_flag_2 += 1;
+            if (f_a > 6) a_flag_6 += 1;
             // fixed_long f_lp_emission = log_probability_match_r9(read, pore_model, kmer_rank, event_idx, strand_idx);
             float score_d, score_u, score_l;
             if (f_diag == -INFINITY) score_d = -INFINITY;
@@ -688,7 +688,7 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
 
     std::ofstream myfile;
     myfile.open("flag_fix_16_16_30.txt", std::fstream::app);
-    myfile << read.read_name << " " << similar_flag_equal << " " << similar_flag_001 << " " << a_flag_2 << " " << a_flag_4 << " " << a_flag_6 << " " << a_flag_8 <<  "\n";
+    myfile << read.read_name << " " << similar_flag_equal << " " << similar_flag_001 << " " << a_flag_12 << " " << a_flag_10 << " " << a_flag_8 << " " << a_flag_6 << " " << n_bands << "\n";
     myfile.close();
     
     // QC results
