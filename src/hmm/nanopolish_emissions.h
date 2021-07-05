@@ -110,6 +110,15 @@ inline fixed f_32_log_normal_pdf(fixed x, const GaussianParameters& g) {
     return f_log_inv_sqrt_2pi - gp_log_stdv + (-0.5f * a * a);
 }
 
+inline fixed f_32_log_normal_pdf_a(fixed x, const GaussianParameters& g) {
+    fixed gp_mean = g.f_32_mean;
+    fixed gp_stdv = g.f_32_stdv;
+    fixed gp_log_stdv = g.f_32_log_stdv;
+    fixed f_log_inv_sqrt_2pi = log(0.3989422804014327);
+    fixed a = (x - gp_mean) / gp_stdv;
+    return a;
+}
+
 inline floatc fp_log_normal_pdf(floatc x, const GaussianParameters& g) {
     floatc gp_mean = g.fp_mean;
     floatc gp_stdv = g.fp_stdv;
@@ -156,6 +165,19 @@ inline fixed f_32_log_probability_match_r9(const SquiggleRead& read,
     GaussianParameters gp = read.f_32_get_scaled_gaussian_from_pore_model_state(pore_model, strand, kmer_rank);
     fixed lp = f_32_log_normal_pdf(level, gp);
     return lp;
+}
+
+inline fixed f_32_log_probability_match_r9_a(const SquiggleRead& read,
+                                      const PoreModel& pore_model,
+                                      uint32_t kmer_rank,
+                                      uint32_t event_idx,
+                                      uint8_t strand)
+{
+    // event level mean, scaled with the drift value
+    fixed level = read.f_32_get_drift_scaled_level(event_idx, strand);
+    GaussianParameters gp = read.f_32_get_scaled_gaussian_from_pore_model_state(pore_model, strand, kmer_rank);
+    fixed a = f_32_log_normal_pdf_a(level, gp);
+    return a;
 }
 
 inline floatc fp_log_probability_match_r9(const SquiggleRead& read,

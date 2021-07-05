@@ -94,8 +94,8 @@ def match_similar_flag(data_type):
         else: dic[fp[i][0]] = [fp[i][1], fp[i][2]]
 
     for key in dic.keys():
-        if (len(dic[key]) == 4):
-            print("{} {} {} {} {} {}".format(key, dic[key][0], dic[key][1], dic[key][2], int(dic[key][1])/int(dic[key][2])))
+        if (len(dic[key]) == 3 and ):
+            print("{} {} {} {} {}".format(key, dic[key][0], dic[key][1], dic[key][2], float(dic[key][1])/float(dic[key][2])))
 
 
 def check_error_for_all_reads(data_type):
@@ -171,7 +171,7 @@ def check_error_for_all_reads(data_type):
             else: diff_else += 1
 
     for key in dic_read.keys():
-        print("{} {}".format(key, sum(dic_read[key])/len(dic_read[key])))
+        print("{} {}".format(key, sum(dic_read[key])))
     print("Ratio", diff_ratio, diff_ratio_0, diff_ratio_0001, diff_ratio_0002, diff_ratio_0004, diff_ratio_001, diff_ratio_002, diff_ratio_004, diff_ratio_01, diff_ratio_02, diff_ratio_04, diff_ratio_1, diff_else)
 
 
