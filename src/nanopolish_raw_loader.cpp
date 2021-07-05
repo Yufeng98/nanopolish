@@ -511,6 +511,8 @@ std::vector<AlignedPair> adaptive_banded_simple_event_align_approximation(Squigg
                 similar_read = true;
             }
 
+            if (abs(score_d - score_u) < 0.01 || abs(score_d - score_l) < 0.01 || (score_l - score_u) < 0.01) similar_flag_001 += 1;
+
             float max_score = score_d;
             uint8_t from = FROM_D;
 

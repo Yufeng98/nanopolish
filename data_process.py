@@ -82,7 +82,7 @@ def match_similar_flag(data_type):
     fp = []
     for line in fp_lines:
         sep = list(line.split())
-        fp.append((sep[0], sep[1], sep[2], sep[3]))
+        fp.append((sep[0], sep[1], sep[2]))
 
     dic = {}
     for i in range(len(fixed)):
@@ -90,12 +90,12 @@ def match_similar_flag(data_type):
         else: dic[fixed[i][0]] = [fixed[i][1]]
 
     for i in range(len(fp)):
-        if fp[i][0] in dic.keys(): dic[fp[i][0]] += [fp[i][1], fp[i][2], fp[i][3]]
-        else: dic[fp[i][0]] = [fp[i][1], fp[i][2], fp[i][3]]
+        if fp[i][0] in dic.keys(): dic[fp[i][0]] += [fp[i][1], fp[i][2]]
+        else: dic[fp[i][0]] = [fp[i][1], fp[i][2]]
 
     for key in dic.keys():
         if (len(dic[key]) == 4):
-            print("{} {} {} {} {}".format(key, dic[key][0], dic[key][1], dic[key][2], dic[key][3]))
+            print("{} {} {} {} {} {}".format(key, dic[key][0], dic[key][1], dic[key][2], int(dic[key][1])/int(dic[key][2])))
 
 
 def check_error_for_all_reads(data_type):
